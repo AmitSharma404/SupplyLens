@@ -1,19 +1,48 @@
 
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { clearAuthError, loginUser } from "../redux/slices/authSlice";
 
 export const Login = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
     const [showPassword, setShowPassword] = useState(false);
     const [input,setInput] = useState({
         email: "",
         password:""
     }); 
+
     const HandleInput = (e) => {
        const {name,value} = e.target;
-       console.log(name,value);
+       if (error) {
+        dispatch(clearAuthError());
+       }
        setInput(prev => ({...prev,[name]: value}))
     }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        dispatch(clearAuthError());
+
+        try {
+            await dispatch(loginUser(input)).unwrap();
+            toast.success('Login successful');
+            navigate('/dashboard', { replace: true });
+        } catch (err) {
+                        const message = typeof err === 'string' ? err : (err?.message || 'Invalid credentials');
+            toast.error(message);
+        }
+    };
+
+        useEffect(() => {
+            if (isAuthenticated) {
+                navigate('/dashboard', { replace: true });
+            }
+        }, [isAuthenticated, navigate]);
 
     return (
         <main className="login-shell relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 sm:py-12">
@@ -91,7 +120,7 @@ export const Login = () => {
                         </p>
                     </div>
 
-                    <form className="mt-8 space-y-5 login-reveal" style={{ animationDelay: "180ms" }}>
+                    <form onSubmit={handleSubmit} className="mt-8 space-y-5 login-reveal" style={{ animationDelay: "180ms" }}>
                         <div>
                             <label
                                 htmlFor="email"
@@ -105,6 +134,7 @@ export const Login = () => {
                                 name="email"
                                 onChange={HandleInput}
                                 value={input.email}
+                                required
                                 placeholder="name@company.com"
                                 className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
                             />
@@ -132,6 +162,7 @@ export const Login = () => {
                                     name="password"
                                     value={input.password}
                                     onChange={HandleInput}
+                                    required
                                     placeholder="Enter your password"
                                     className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 pr-20 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
                                 />
@@ -156,20 +187,23 @@ export const Login = () => {
                             <p className="text-xs text-[#627d98]">Encrypted session</p>
                         </div>
 
+                        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+
                         <button
                             type="submit"
+                            disabled={loading}
                             className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f08c2e] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#102a43] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f6ad55] active:translate-y-0"
                         >
-                            Log In
+                            {loading ? "Logging in..." : "Log In"}
                             <span className="transition group-hover:translate-x-1">→</span>
                         </button>
                     </form>
 
                     <p className="login-reveal mt-7 text-center text-sm text-[#486581]" style={{ animationDelay: "260ms" }}>
                         New to SupplyLens?{" "}
-                        <a href="#" className="font-bold text-[#102a43] underline decoration-[#f6c453] underline-offset-4">
-                            Request access
-                        </a>
+                        <Link to="/register" className="font-bold text-[#102a43] underline decoration-[#f6c453] underline-offset-4">
+                            Create account
+                        </Link>
                     </p>
                 </div>
             </section>
