@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Login } from "./Authentication/Login";
 
 const LAUNCH_DATE = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -63,6 +65,7 @@ export default function App() {
   }
 
   return (
+   
     <div className="relative min-h-screen w-full bg-[#070514] flex items-center justify-center overflow-hidden">
       {/* ── Animated gradient blobs ── */}
       <div className="pointer-events-none absolute inset-0">
@@ -99,6 +102,9 @@ export default function App() {
             Launching Soon
           </span>
         </div>
+        <button className="text-white bg-sky-300/10 border border-sky-400/20 rounded-full px-5 py-1 font-bold">
+        <Link to={'/login'}>Login</Link>
+        </button>
 
         {/* Logo / Name */}
         <h1 className="text-6xl sm:text-7xl md:text-8xl font-black leading-none tracking-tighter text-white mb-4">
