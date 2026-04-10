@@ -1,6 +1,6 @@
 
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "/api/auth";
 const DEFAULT_ERROR_MESSAGE = "Something went wrong";
 
 const parseResponseBody = async (response) => {
@@ -66,7 +66,7 @@ export const logout = async () => {
 
 export const getCurrentUser = async () => {
     try {
-        return await request('/me');
+        return await request('/');
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }
