@@ -1,75 +1,48 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap");
+@import 'tailwindcss';
 
-:root {
-	font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+
+
+  --color-status-healthy: hsl(var(--status-healthy));
+  --color-status-warning: hsl(var(--status-warning));
+  --color-status-critical: hsl(var(--status-critical));
+  -
 }
 
-.login-shell {
-	background:
-		radial-gradient(circle at 12% 15%, rgba(242, 143, 59, 0.25), transparent 35%),
-		radial-gradient(circle at 85% 78%, rgba(45, 130, 181, 0.25), transparent 40%),
-		linear-gradient(145deg, #fff7e8 0%, #f0f4f8 45%, #fff1e4 100%);
-}
+@layer base {
+  :root {
+    --background: 0 0% 95%;
+    /* #F3F4F6 page bg  */
+    --foreground: 220 9% 11%;
+    /* #111827 text      */
+    --primary: 161 80% 34%;
+    /* #1F7A4D brand     */
+    --status-healthy: 150 58% 41%;
+    /* #28A86A           */
+    --status-warning: 38 92% 50%;
+    /* #F59E0B           */
+    --status-critical: 0 79% 60%;
+    /* #EF4444           */
 
-.login-card {
-	font-family: "Sora", "Plus Jakarta Sans", "Segoe UI", sans-serif;
-}
+  }
 
-.login-blob {
-	position: absolute;
-	border-radius: 999px;
-	filter: blur(70px);
-	opacity: 0.55;
-	animation: drift 9s ease-in-out infinite;
-}
 
-.login-blob-one {
-	top: -8rem;
-	left: -6rem;
-	width: 20rem;
-	height: 20rem;
-	background: #f08c2e;
-}
 
-.login-blob-two {
-	right: -5rem;
-	bottom: -7rem;
-	width: 18rem;
-	height: 18rem;
-	background: #2d82b5;
-	animation-delay: 1.6s;
-}
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-.login-grid {
-	position: absolute;
-	inset: 0;
-	background-image: linear-gradient(rgba(16, 42, 67, 0.06) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(16, 42, 67, 0.06) 1px, transparent 1px);
-	background-size: 40px 40px;
-	mask-image: radial-gradient(circle at center, black 30%, transparent 85%);
-}
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+  }
 
-.login-reveal {
-	opacity: 0;
-	transform: translateY(12px);
-	animation: reveal 0.65s ease forwards;
-}
-
-@keyframes reveal {
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes drift {
-	0%,
-	100% {
-		transform: translate3d(0, 0, 0) scale(1);
-	}
-	50% {
-		transform: translate3d(0, -16px, 0) scale(1.04);
-	}
 }
