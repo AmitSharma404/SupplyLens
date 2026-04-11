@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from '../App';
-import { Home } from '../pages/Home';
 import { Login } from '../Authentication/Login';
 import { Register } from '../Authentication/Register';
 import { Dashboard } from '../pages/Dashboard';
@@ -14,44 +13,38 @@ const routes = [
   {
     path: '/',
     element: <App />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
+  },
+  {
+    path: '/dashboard',
+    element: <Dashboard />,
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <DashboardHome />,
       },
       {
-        path: 'login',
-        element: <Login />,
+        path: 'delivery',
+        element: <DashboardDelivery />,
       },
       {
-        path: 'register',
-        element: <Register />,
+        path: 'inventory',
+        element: <DashboardInventory />,
       },
       {
-        path: 'dashboard',
-        element: <Dashboard />,
-        children: [
-          {
-            index: true,
-            element: <DashboardHome />,
-          },
-          {
-            path: 'delivery',
-            element: <DashboardDelivery/>,
-          },
-          {
-            path: 'inventory',
-            element: <DashboardInventory />,
-          },
-          {
-            path: 'alerts',
-            element: <DashboardAlerts />,
-          },
-          {
-            path: 'settings',
-            element: <DashboardSettings />,
-          },
-        ],
+        path: 'alerts',
+        element: <DashboardAlerts />,
+      },
+      {
+        path: 'settings',
+        element: <DashboardSettings />,
       },
     ],
   },
