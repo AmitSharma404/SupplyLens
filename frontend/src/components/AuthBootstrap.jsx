@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { checkAuth } from "../redux/slices/authSlice";
+import { checkAuth } from "../redux/slices/authSlice.js";
 
 const AuthBootstrap = ({ children }) => {
   const dispatch = useDispatch();

@@ -4,7 +4,7 @@ import {
   login as loginRequest,
   logout as logoutRequest,
   register as registerRequest,
-} from "../../Instance/API";
+} from "../../Instance/API.js";
 
 export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, { rejectWithValue }) => {
   try {
@@ -68,10 +68,9 @@ const authSlice = createSlice({
         state.checkingAuth = true;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
- main
-        state.isAuthenticated = true;
-        state.user = action.payload;
         state.checkingAuth = false;
+        state.user = action.payload?.user ?? action.payload ?? null;
+        state.isAuthenticated = Boolean(state.user);
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isAuthenticated = false;
@@ -84,8 +83,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
+        state.user = action.payload?.user ?? action.payload ?? null;
+        state.isAuthenticated = Boolean(state.user);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -97,8 +96,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
+        state.user = action.payload?.user ?? action.payload ?? null;
+        state.isAuthenticated = Boolean(state.user);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
