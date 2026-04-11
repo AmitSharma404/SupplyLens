@@ -11,7 +11,7 @@
   --color-status-healthy: hsl(var(--status-healthy));
   --color-status-warning: hsl(var(--status-warning));
   --color-status-critical: hsl(var(--status-critical));
-  -
+  
 }
 
 @layer base {
@@ -29,6 +29,12 @@
     --status-critical: 0 79% 60%;
     /* #EF4444           */
 
+    --color-background: hsl(var(--background));
+    --color-foreground: hsl(var(--foreground));
+    --color-primary: hsl(var(--primary));
+    --color-status-healthy: hsl(var(--status-healthy));
+    --color-status-warning: hsl(var(--status-warning));
+    --color-status-critical: hsl(var(--status-critical));
   }
 
 

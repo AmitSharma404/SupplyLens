@@ -5,7 +5,7 @@ import { Footer } from './components/Footer'
 
 const App = () => {
   return (
-    <div className="w-full bg-background ">
+    <div className="w-full bg-background">
       <div className="max-w-7xl   mx-auto px-2">
         {/* <Header /> */}
         <Outlet />
