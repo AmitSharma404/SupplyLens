@@ -68,6 +68,7 @@ const authSlice = createSlice({
         state.checkingAuth = true;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
+ main
         state.isAuthenticated = true;
         state.user = action.payload;
         state.checkingAuth = false;
