@@ -61,6 +61,8 @@ cd frontend
 npm run build
 ```
 
+If the frontend is deployed separately from the backend, set `VITE_API_URL` to the deployed auth base URL before building, for example `https://api.example.com/api/auth`.
+
 ---
 
 ## 🌿 Branch Naming Convention
