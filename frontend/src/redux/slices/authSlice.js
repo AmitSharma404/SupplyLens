@@ -6,12 +6,12 @@ import {
   register as registerRequest,
 } from "../../Instance/API";
 
-export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, thunkAPI) => {
+export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, { rejectWithValue }) => {
   try {
     const data = await getCurrentUser();
-    return data;
+    return data.user;
   } catch (error) {
-    return thunkAPI.rejectWithValue(error.message || "Not authenticated");
+    return rejectWithValue(error.message);
   }
 });
 
@@ -35,8 +35,8 @@ export const registerUser = createAsyncThunk("auth/register", async (payload, th
 
 export const logoutUser = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   try {
-    const data = await logoutRequest();
-    return data;
+    await logoutRequest();
+    return;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message || "Logout failed");
   }
@@ -46,8 +46,8 @@ const initialState = {
   user: null,
   isAuthenticated: false,
   loading: false,
-  checkingAuth: true,
   error: null,
+  checkingAuth: true,
 };
 
 const authSlice = createSlice({
@@ -60,18 +60,23 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isAuthenticated = false;
+        state.user = null;
+      })
       .addCase(checkAuth.pending, (state) => {
         state.checkingAuth = true;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
-        state.checkingAuth = false;
-        state.user = action.payload;
+ main
         state.isAuthenticated = true;
+        state.user = action.payload;
+        state.checkingAuth = false;
       })
       .addCase(checkAuth.rejected, (state) => {
-        state.checkingAuth = false;
-        state.user = null;
         state.isAuthenticated = false;
+        state.user = null;
+        state.checkingAuth = false;
       })
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
