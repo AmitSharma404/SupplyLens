@@ -1,7 +1,7 @@
 
 import express from 'express';
-import { register,login,logout, getCurrentUser } from '../Authentication/authControlles.js';
-import { protectedRoute } from '../utils/protectedRoutes.js';
+import { register,login,logout, getCurrentUser } from '../controllers/authController.js';
+import { protectedRoute } from '../middleware/authMiddleware.js';
 
 const appRouter = express.Router();
 

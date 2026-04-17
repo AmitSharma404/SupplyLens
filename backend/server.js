@@ -3,7 +3,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
-import appRouter from './Routes/auth.routes.js';
+import appRouter from './routes/authRoutes.js';
+import productRouter from './routes/productRoutes.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -13,13 +14,14 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(cors({origin:FRONTEND_URL,credentials:true}));
 
-import { connetDB } from './DB/connection.js';
+import { connetDB } from './config/db.js';
 connetDB();
 
 //api endpoints
 // routes
 
 app.use('/api/auth', appRouter);
+app.use('/api/products', productRouter);
 
 app.get('/api/auth', (req, res) => {
     res.send('Hello World!');

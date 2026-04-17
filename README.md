@@ -10,32 +10,15 @@ SupplyLens is an intelligent supply-chain visibility platform that helps busines
 
 ```
 SupplyLens/
-├── frontend/        # React.js + Tailwind CSS (Vite)
-├── backend/         # API server (coming soon)
+├── frontend/        
+├── backend/          
 └── README.md        # You are here
 ```
 
----
-
-## 🚀 Tech Stack
-
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
-| Frontend  | React.js, Tailwind CSS v4, Vite     |
-| Backend   | Coming soon                         |
-| Tooling   | ESLint, npm                         |
-
----
 
 ## ⚙️ Getting Started
 
-### Prerequisites
 
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/) v18 or higher
-- npm v9 or higher
-- Git
 
 ### 1. Clone the repository
 
@@ -65,19 +48,6 @@ If the frontend is deployed separately from the backend, set `VITE_API_URL` to t
 
 ---
 
-## 🌿 Branch Naming Convention
-
-Use the following format when creating branches:
-
-| Type       | Format                        | Example                        |
-|------------|-------------------------------|--------------------------------|
-| Feature    | `feat/short-description`      | `feat/add-login-page`          |
-| Bug Fix    | `fix/short-description`       | `fix/navbar-overflow`          |
-| Hotfix     | `hotfix/short-description`    | `hotfix/crash-on-submit`       |
-| Docs       | `docs/short-description`      | `docs/update-readme`           |
-| Chore      | `chore/short-description`     | `chore/upgrade-dependencies`   |
-
----
 
 ## 🔃 How to Raise a Pull Request (PR)
 
@@ -144,44 +114,5 @@ git push origin feat/your-feature-name
 4. Request a review from a team member
 5. Click **"Create Pull Request"**
 
-### Step 7 — Address review feedback
-
-- Respond to all comments
-- Push additional commits to the same branch
-- Once approved, a maintainer will merge your PR
-
----
-
-## ✅ PR Checklist
-
-Before submitting your PR, make sure:
-
-- [ ] Code builds without errors (`npm run build`)
-- [ ] No console errors or warnings
-- [ ] UI is responsive and tested on mobile
-- [ ] Commit messages follow Conventional Commits
-- [ ] PR description clearly explains the change
-- [ ] Screenshots added (for UI changes)
-- [ ] No unnecessary files committed (e.g. `node_modules`, `dist`)
-
----
-
-## 🛡️ Code of Conduct
-
-Be respectful, inclusive, and constructive. We welcome contributors of all experience levels.
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## 📬 Contact
-
-Have questions or suggestions? Reach out at **hello@supplylens.io** or open a [GitHub Issue](https://github.com/your-username/SupplyLens/issues).
-
----
 
 <p align="center">Made with ❤️ by the SupplyLens Team</p>
