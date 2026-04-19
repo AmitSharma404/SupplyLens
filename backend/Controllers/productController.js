@@ -18,7 +18,7 @@ export const addProduct = async (req, res) => {
     try {
         const { name, sku, category, description, price, minimumStockLevel, safetyStock, supplierId } = req.body;
 
-        // Create a new product instance
+        
         const newProduct = new Product({
             name,
             sku,
