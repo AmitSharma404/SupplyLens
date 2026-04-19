@@ -3,15 +3,15 @@ import express from 'express';
 import { register,login,logout, getCurrentUser } from '../Authentication/authControlles.js';
 import { protectedRoute } from '../utils/protectedRoutes.js';
 
-const appRouter = express.Router();
+const authRouter = express.Router();
 
-appRouter.post('/register',register);
+authRouter.post('/register',register);
 
-appRouter.post('/login',login);
+authRouter.post('/login',login);
 
-appRouter.post('/logout',logout);
+authRouter.post('/logout',logout);
 
-appRouter.get('/me', protectedRoute, getCurrentUser);
+authRouter.get('/me', protectedRoute, getCurrentUser);
 
-export default appRouter;
+export default authRouter;
 

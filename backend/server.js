@@ -3,7 +3,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
-import appRouter from './Routes/auth.routes.js';
+import authRouter from './Routes/auth.routes.js';
+import productRouter from './Routes/product.routes.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -19,7 +20,8 @@ connetDB();
 //api endpoints
 // routes
 
-app.use('/api/auth', appRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/products', productRouter); // Assuming you have product routes defined in productRouter as well
 
 app.get('/api/auth', (req, res) => {
     res.send('Hello World!');
