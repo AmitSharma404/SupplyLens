@@ -13,15 +13,22 @@ export const DashboardInventory = () => {
     } )()
   },[])
 
-  return <div>
-    {products?.map((item,key) => (
+  return (
+    <div>
+      <div>
+        {products?.map((item,key) => (
       <div key={key}>
         <p>{item?.name}</p>
         <p>{item?._id}</p>
         <p>{item?.category}</p>
-        <p>description {item.description}</p>
+        <p>description :{item.description}</p>
         <p>Rs.{item.price}</p>
       </div>
     ))}
-  </div>;
+      </div>
+      <div>
+
+      </div>
+    </div>
+  )
 };

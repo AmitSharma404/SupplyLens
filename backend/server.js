@@ -7,6 +7,7 @@ import authRouter from './Routes/auth.routes.js';
 import productRouter from './Routes/product.routes.js';
 import cookieParser from 'cookie-parser';
 import supplierRoute from './Routes/supplier.route.js';
+import orderRouter from './Routes/order.routes.js';
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -24,6 +25,7 @@ connetDB();
 app.use('/api/auth', authRouter);
 app.use('/api/products', productRouter); // Assuming you have product routes defined in productRouter as well
 app.use('/api/suppliers', supplierRoute); // Assuming you have supplier routes defined in supplierRoute as well
+app.use('/api/orders', orderRouter);
 
 app.get('/api/auth', (req, res) => {
     res.send('Hello World!');

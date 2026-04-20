@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Download, DownloadIcon } from "lucide-react";
+import { createOrder } from '../../Instance/API.js';
 
 const Card = ({ children, className = '' }) => (
   <div
@@ -285,6 +287,58 @@ const ReorderRow = ({
 
 
 export const DashboardHome = () => {
+  const [form, setForm] = useState({
+    orderNumber: '',
+    supplierId: '',
+    productId: '',
+    quantityOrdered: '',
+    unitPrice: '',
+    expectedDeliveryDate: '',
+  });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setMessage('');
+    setError('');
+    setIsSubmitting(true);
+
+    const quantity = Number(form.quantityOrdered);
+    const price = Number(form.unitPrice);
+
+    try {
+      const response = await createOrder({
+        ...form,
+        quantityOrdered: quantity,
+        unitPrice: price,
+        totalCost: quantity * price,
+      });
+
+      setMessage(response?.msg || 'Order created successfully');
+      setForm({
+        orderNumber: '',
+        supplierId: '',
+        productId: '',
+        quantityOrdered: '',
+        unitPrice: '',
+        expectedDeliveryDate: '',
+      });
+    } catch (submitError) {
+      setError(submitError.message || 'Failed to create order');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const totalCost = Number(form.quantityOrdered || 0) * Number(form.unitPrice || 0);
+
   return (
     <div className=" p-5 font-sans ">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
@@ -292,6 +346,34 @@ export const DashboardHome = () => {
           <StatCard key={s.label} {...s} />
         ))}
       </div>
+
+      <Card className="p-5 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">Create Order</h2>
+            <p className="text-[12px] text-gray-400 mt-1">Send a new purchase order to the backend.</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input name="orderNumber" value={form.orderNumber} onChange={handleChange} placeholder="Order Number" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <input name="supplierId" value={form.supplierId} onChange={handleChange} placeholder="Supplier ID" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <input name="productId" value={form.productId} onChange={handleChange} placeholder="Product ID" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <input name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <input name="quantityOrdered" type="number" min="1" value={form.quantityOrdered} onChange={handleChange} placeholder="Quantity" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <input name="unitPrice" type="number" min="0" step="0.01" value={form.unitPrice} onChange={handleChange} placeholder="Unit Price" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+
+          <div className="md:col-span-2 flex items-center justify-between gap-3 pt-1">
+            <p className="text-sm text-gray-500">Total Cost: <span className="font-bold text-gray-900">{totalCost.toFixed(2)}</span></p>
+            <button type="submit" disabled={isSubmitting} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">
+              {isSubmitting ? 'Creating...' : 'Create Order'}
+            </button>
+          </div>
+
+          {message && <p className="md:col-span-2 text-sm text-status-healthy font-medium">{message}</p>}
+          {error && <p className="md:col-span-2 text-sm text-status-critical font-medium">{error}</p>}
+        </form>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
         <div className="flex flex-col gap-4">

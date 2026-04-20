@@ -6,41 +6,53 @@ import {
   register as registerRequest,
 } from "../../Instance/API.js";
 
-export const checkAuth = createAsyncThunk("auth/checkAuth", async (_, { rejectWithValue }) => {
-  try {
-    const data = await getCurrentUser();
-    return data.user;
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
+export const checkAuth = createAsyncThunk(
+  "auth/checkAuth",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await getCurrentUser();
+      return data.user;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-export const loginUser = createAsyncThunk("auth/login", async (credentials, thunkAPI) => {
-  try {
-    const data = await loginRequest(credentials);
-    return data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.message || "Login failed");
-  }
-});
+export const loginUser = createAsyncThunk(
+  "auth/login",
+  async (credentials, thunkAPI) => {
+    try {
+      const data = await loginRequest(credentials);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message || "Login failed");
+    }
+  },
+);
 
-export const registerUser = createAsyncThunk("auth/register", async (payload, thunkAPI) => {
-  try {
-    const data = await registerRequest(payload);
-    return data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.message || "Register failed");
-  }
-});
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (payload, thunkAPI) => {
+    try {
+      const data = await registerRequest(payload);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message || "Register failed");
+    }
+  },
+);
 
-export const logoutUser = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
-  try {
-    await logoutRequest();
-    return;
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.message || "Logout failed");
-  }
-});
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await logoutRequest();
+      return;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message || "Logout failed");
+    }
+  },
+);
 
 const initialState = {
   user: null,
