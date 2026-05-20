@@ -4,7 +4,9 @@ import {
     getProducts,
     getProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    createStockMovement,
+    getProductMovements
 } from "../controllers/productController.js";
 import { protectedRoute, adminRoute } from "../middleware/authMiddleware.js";
 
@@ -18,5 +20,10 @@ productRouter.route("/:id")
     .get(protectedRoute, getProductById)
     .put(protectedRoute, adminRoute, updateProduct) // Admin only
     .delete(protectedRoute, adminRoute, deleteProduct); // Admin only
+
+productRouter.route("/:id/movements")
+    .post(protectedRoute, createStockMovement)
+    .get(protectedRoute, getProductMovements);
+
 
 export default productRouter;

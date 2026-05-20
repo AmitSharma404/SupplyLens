@@ -66,7 +66,7 @@ export const logout = async () => {
 
 export const getCurrentUser = async () => {
     try {
-        return await request('/');
+        return await request('/me');
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }
