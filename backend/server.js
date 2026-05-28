@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(cors({origin:FRONTEND_URL,credentials:true}));
 
-import { connetDB } from './config/db.js';
-connetDB();
+import { connectDB } from './config/db.js';
+connectDB();
 
 //api endpoints
 // routes

@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import StockMovement from "../models/StockMovement.js";
+import Supplier from "../models/Supplier.js";
 
 
 // @desc    Create a new product
@@ -13,9 +14,28 @@ export const createProduct = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide name, sku, price, and supplier." });
         }
 
+        const numericPrice = Number(price);
+        const numericStock = stockQuantity !== undefined ? Number(stockQuantity) : 0;
+        const numericThreshold = lowStockThreshold !== undefined ? Number(lowStockThreshold) : 5;
+
+        if (isNaN(numericPrice) || numericPrice < 0) {
+            return res.status(400).json({ success: false, message: "Price must be a valid non-negative number." });
+        }
+        if (isNaN(numericStock) || numericStock < 0) {
+            return res.status(400).json({ success: false, message: "Stock quantity must be a valid non-negative number." });
+        }
+        if (isNaN(numericThreshold) || numericThreshold < 0) {
+            return res.status(400).json({ success: false, message: "Low stock threshold must be a valid non-negative number." });
+        }
+
         const productExists = await Product.findOne({ sku });
         if (productExists) {
             return res.status(400).json({ success: false, message: "Product with this SKU already exists." });
+        }
+
+        const supplierExists = await Supplier.findById(supplier);
+        if (!supplierExists) {
+            return res.status(404).json({ success: false, message: "Supplier not found." });
         }
 
         let product = await Product.create({
@@ -23,9 +43,9 @@ export const createProduct = async (req, res) => {
             sku,
             description,
             category,
-            price,
-            stockQuantity,
-            lowStockThreshold,
+            price: numericPrice,
+            stockQuantity: numericStock,
+            lowStockThreshold: numericThreshold,
             supplier,
             user: req.user._id
         });
@@ -78,6 +98,37 @@ export const updateProduct = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
+        if (req.body.supplier !== undefined) {
+            const supplierExists = await Supplier.findById(req.body.supplier);
+            if (!supplierExists) {
+                return res.status(404).json({ success: false, message: "Supplier not found." });
+            }
+        }
+
+        if (req.body.price !== undefined) {
+            const price = Number(req.body.price);
+            if (isNaN(price) || price < 0) {
+                return res.status(400).json({ success: false, message: "Price must be a valid non-negative number." });
+            }
+            req.body.price = price;
+        }
+
+        if (req.body.stockQuantity !== undefined) {
+            const stockQuantity = Number(req.body.stockQuantity);
+            if (isNaN(stockQuantity) || stockQuantity < 0) {
+                return res.status(400).json({ success: false, message: "Stock quantity must be a valid non-negative number." });
+            }
+            req.body.stockQuantity = stockQuantity;
+        }
+
+        if (req.body.lowStockThreshold !== undefined) {
+            const lowStockThreshold = Number(req.body.lowStockThreshold);
+            if (isNaN(lowStockThreshold) || lowStockThreshold < 0) {
+                return res.status(400).json({ success: false, message: "Low stock threshold must be a valid non-negative number." });
+            }
+            req.body.lowStockThreshold = lowStockThreshold;
+        }
+
         product = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -117,8 +168,13 @@ export const createStockMovement = async (req, res) => {
         const { type, quantity, reason } = req.body;
         const productId = req.params.id;
 
-        if (!type || !quantity || !reason) {
+        if (type === undefined || quantity === undefined || !reason) {
             return res.status(400).json({ success: false, message: "Please provide type, quantity, and reason." });
+        }
+
+        const parsedQuantity = Number(quantity);
+        if (isNaN(parsedQuantity) || parsedQuantity < 0) {
+            return res.status(400).json({ success: false, message: "Quantity must be a valid non-negative number." });
         }
 
         const product = await Product.findById(productId);
@@ -129,14 +185,14 @@ export const createStockMovement = async (req, res) => {
         // Adjust stock Quantity
         let newStock = product.stockQuantity;
         if (type === "in") {
-            newStock += Number(quantity);
+            newStock += parsedQuantity;
         } else if (type === "out") {
-            if (product.stockQuantity < quantity) {
+            if (product.stockQuantity < parsedQuantity) {
                 return res.status(400).json({ success: false, message: `Insufficient stock. Current stock is ${product.stockQuantity}.` });
             }
-            newStock -= Number(quantity);
+            newStock -= parsedQuantity;
         } else if (type === "adjustment") {
-            newStock = Number(quantity);
+            newStock = parsedQuantity;
         } else {
             return res.status(400).json({ success: false, message: "Invalid movement type. Must be 'in', 'out', or 'adjustment'." });
         }
@@ -145,7 +201,7 @@ export const createStockMovement = async (req, res) => {
         const movement = await StockMovement.create({
             product: productId,
             type,
-            quantity: Number(quantity),
+            quantity: parsedQuantity,
             reason,
             user: req.user._id
         });

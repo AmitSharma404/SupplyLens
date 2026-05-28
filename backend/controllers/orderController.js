@@ -1,6 +1,7 @@
 import PurchaseOrder from "../models/PurchaseOrder.js";
 import Product from "../models/Product.js";
 import StockMovement from "../models/StockMovement.js";
+import Supplier from "../models/Supplier.js";
 
 // @desc    Create a new purchase order
 // @route   POST /api/orders
@@ -13,17 +14,27 @@ export const createPurchaseOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide supplier and at least one item." });
         }
 
+        const supplierExists = await Supplier.findById(supplier);
+        if (!supplierExists) {
+            return res.status(404).json({ success: false, message: "Supplier not found." });
+        }
+
         // Validate items and calculate totalAmount
         let totalAmount = 0;
         for (const item of items) {
-            if (!item.product || !item.quantity || item.unitPrice === undefined) {
+            if (!item.product || item.quantity === undefined || item.unitPrice === undefined) {
                 return res.status(400).json({ success: false, message: "Each item must have a product ID, quantity, and unitPrice." });
+            }
+            const qty = Number(item.quantity);
+            const price = Number(item.unitPrice);
+            if (isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
+                return res.status(400).json({ success: false, message: "Quantity must be a valid number greater than 0, and unit price must be a valid non-negative number." });
             }
             const product = await Product.findById(item.product);
             if (!product) {
                 return res.status(404).json({ success: false, message: `Product with ID ${item.product} not found.` });
             }
-            totalAmount += Number(item.quantity) * Number(item.unitPrice);
+            totalAmount += qty * price;
         }
 
         const purchaseOrder = await PurchaseOrder.create({
@@ -74,8 +85,16 @@ export const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: "Purchase order not found." });
         }
 
-        // Check if status is transitioning to delivered
+        // Enforce terminal status transition rules
         const prevStatus = purchaseOrder.status;
+        if (prevStatus === "delivered") {
+            return res.status(400).json({ success: false, message: "Delivered purchase orders cannot be modified." });
+        }
+        if (prevStatus === "cancelled") {
+            return res.status(400).json({ success: false, message: "Cancelled purchase orders cannot be modified." });
+        }
+
+        // Check if status is transitioning to delivered
         if (status === "delivered" && prevStatus !== "delivered") {
             // Process and reconcile stock for all items
             for (const item of purchaseOrder.items) {

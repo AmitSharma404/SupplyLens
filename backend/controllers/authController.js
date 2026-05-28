@@ -9,8 +9,10 @@ export const register = async (req, res) => {
     return res.status(400).json({ message: "Name, email and password are required" });
   }
 
+  const normalizedEmail = email.toLowerCase().trim();
+
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -19,7 +21,7 @@ export const register = async (req, res) => {
 
     const newUser = new User({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -56,7 +58,7 @@ export const login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
