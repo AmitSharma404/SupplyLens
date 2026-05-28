@@ -8,6 +8,7 @@ import { DashboardHome } from '../pages/Dashboard/DashboardHome';
 import { DashboardAlerts } from '../pages/Dashboard/DashboardAlerts';
 import { DashboardSettings } from '../pages/Dashboard/DashboardSettings';
 import { DashboardDelivery } from '../pages/Dashboard/DashboardDelivery';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 const routes = [
   {
@@ -24,7 +25,11 @@ const routes = [
   },
   {
     path: '/dashboard',
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,

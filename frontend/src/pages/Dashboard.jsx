@@ -4,25 +4,20 @@ import { Sidebar } from '../components/Sidebar';
 import { Outlet } from 'react-router-dom';
 
 export const Dashboard = () => {
-
   return (
-    <div className="px-1  md:px-2 lg:px-3 flex gap-3  ">
-      
+    <div className="min-h-screen bg-[#F8FAF8] text-[#111A16] flex gap-4 px-4 py-4">
+      {/* Sticky sidebar */}
+      <aside className="hidden md:block shrink-0 sticky top-4 h-[94vh]">
+        <Sidebar />
+      </aside>
 
-      <div className=" h-screen  py-4 shrink-0 sticky top-2 left-0 ">
-        <Sidebar  />
-      </div>
-      <div
-        className="flex-1 transition-all duration-300 ease-in-out drop-shadow-xs 
-       "
-      >
-        <div className="flex flex-col gap-3 py-4 ">
-          <DashboardHeader />
-          <div className="bg-white  rounded-2xl drop-shadow-xs">
-            <Outlet />
-          </div>
+      {/* Main panel */}
+      <main className="flex-1 flex flex-col gap-4 min-w-0">
+        <DashboardHeader />
+        <div className="flex-1 bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+          <Outlet />
         </div>
-      </div>
+      </main>
     </div>
   );
 };

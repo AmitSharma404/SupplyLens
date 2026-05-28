@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAuthError, registerUser } from "../redux/slices/authSlice";
+import { Sparkles, User, Key, Eye, EyeOff, Mail, Loader2 } from "lucide-react";
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export const Register = () => {
 
     try {
       await dispatch(registerUser(formData)).unwrap();
-      toast.success("Account created successfully");
+      toast.success("Welcome! Account created successfully");
       navigate("/dashboard", { replace: true });
     } catch (err) {
       const message = typeof err === "string" ? err : (err?.message || "Unable to register");
@@ -45,105 +46,171 @@ export const Register = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <main className="login-shell relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 sm:py-12">
+    <main className="relative min-h-screen bg-[#F8FAF8] text-[#111A16] flex items-center justify-center px-4 py-12 overflow-hidden select-none">
+      {/* Background elements matching landing page */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="login-blob login-blob-one" />
-        <div className="login-blob login-blob-two" />
-        <div className="login-grid" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#1F7A4D]/5 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-400/5 blur-3xl" />
+        <div 
+          className="absolute inset-0 opacity-15"
+          style={{
+            backgroundImage: "radial-gradient(#1F7A4D 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
       </div>
 
-      <section className="login-card relative z-10 mx-auto w-full max-w-xl rounded-[28px] border border-white/70 bg-white/85 p-7 shadow-[0_20px_80px_-30px_rgba(25,35,45,0.45)] backdrop-blur-sm sm:p-10">
-        <div className="mb-8 flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#486581]">Create Account</p>
-          <Link
-            to="/login"
-            className="rounded-full border border-[#bcccdc] px-4 py-1.5 text-xs font-semibold text-[#334e68] transition hover:border-[#486581] hover:text-[#102a43]"
-          >
-            Login
-          </Link>
-        </div>
+      {/* Register Card Grid */}
+      <section className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[32px] border border-gray-100 bg-white/95 shadow-xl shadow-gray-100/50 backdrop-blur-md grid grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+        
+        {/* Left Panel - Dark Forest Green Panel */}
+        <aside className="hidden md:flex flex-col justify-between bg-[#111A16] p-12 text-[#F8FAF8] relative">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#1F7A4D]/10 to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#1F7A4D] to-[#2DA96A] flex items-center justify-center shadow-sm">
+                <span className="text-white font-black text-sm">S</span>
+              </div>
+              <span className="text-base font-bold tracking-tight text-white">
+                Supply <span className="text-[#2DA96A]">Lens</span>
+              </span>
+            </Link>
 
-        <h1 className="text-3xl font-black text-[#102a43] sm:text-4xl">Register</h1>
-        <p className="mt-3 text-sm leading-6 text-[#486581]">
-          Join SupplyLens and start managing your operations dashboard.
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div>
-            <label htmlFor="name" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-[#334e68]">
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInput}
-              required
-              placeholder="Your name"
-              className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
-            />
+            <h1 className="text-3xl font-black leading-tight tracking-tight mt-6">
+              Join the logistics <br />
+              <span className="text-[#2DA96A] italic font-serif font-semibold">network today.</span>
+            </h1>
+            <p className="mt-4 text-xs text-gray-400 font-medium leading-relaxed max-w-xs">
+              Streamline warehouse capacity, verify carrier deliveries, and scale your logistics pipeline with ease.
+            </p>
           </div>
 
-          <div>
-            <label htmlFor="email" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-[#334e68]">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInput}
-              required
-              placeholder="name@company.com"
-              className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-[#334e68]">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleInput}
-                required
-                minLength={6}
-                placeholder="At least 6 characters"
-                className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 pr-20 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-2 my-auto h-9 rounded-lg px-3 text-xs font-bold uppercase tracking-wide text-[#486581] transition hover:bg-[#f0f4f8] hover:text-[#102a43]"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+          {/* Operational snapshot */}
+          <div className="relative z-10 bg-white/5 border border-white/10 p-5 rounded-2xl">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#2DA96A] mb-3">SYSTEM PARAMETERS</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-lg font-black">100%</p>
+                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">Tracking</p>
+              </div>
+              <div>
+                <p className="text-lg font-black">0%</p>
+                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">Paperwork</p>
+              </div>
+              <div>
+                <p className="text-lg font-black">24/7</p>
+                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">Operations</p>
+              </div>
             </div>
           </div>
+        </aside>
 
-          {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+        {/* Right Panel - Form */}
+        <div className="p-8 sm:p-12 flex flex-col justify-center bg-white">
+          <div className="flex items-center justify-between mb-8">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Secure Register</span>
+            <Link 
+              to="/" 
+              className="text-xs font-bold text-gray-500 hover:text-[#1F7A4D] border border-gray-150 px-4 py-2 rounded-xl transition-colors bg-white hover:bg-gray-50"
+            >
+              Back Home
+            </Link>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center rounded-xl bg-[#f08c2e] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#102a43] transition duration-200 hover:bg-[#f6ad55] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {loading ? "Creating..." : "Create Account"}
-          </button>
-        </form>
+          <h2 className="text-3xl font-black text-gray-900 tracking-tight">Create Account</h2>
+          <p className="text-xs text-gray-400 font-semibold mt-1">
+            Join SupplyLens and start managing your operations dashboard.
+          </p>
 
-        <p className="mt-6 text-center text-sm text-[#486581]">
-          Already have an account?{" "}
-          <Link to="/login" className="font-bold text-[#102a43] underline decoration-[#f6c453] underline-offset-4">
-            Sign in
-          </Link>
-        </p>
+          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+            {/* Full Name */}
+            <div>
+              <label className="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">FULL NAME</label>
+              <div className="relative">
+                <User size={14} className="absolute left-3.5 inset-y-0 my-auto text-gray-400" />
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleInput}
+                  placeholder="e.g. Jane Doe"
+                  className="w-full pl-9 pr-4 py-3 text-xs font-bold rounded-xl bg-gray-50 border-0 outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-1 focus:ring-[#1F7A4D]"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">EMAIL ADDRESS</label>
+              <div className="relative">
+                <Mail size={14} className="absolute left-3.5 inset-y-0 my-auto text-gray-400" />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInput}
+                  placeholder="name@company.com"
+                  className="w-full pl-9 pr-4 py-3 text-xs font-bold rounded-xl bg-gray-50 border-0 outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-1 focus:ring-[#1F7A4D]"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">PASSWORD</label>
+              <div className="relative">
+                <Key size={14} className="absolute left-3.5 inset-y-0 my-auto text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  required
+                  minLength={6}
+                  value={formData.password}
+                  onChange={handleInput}
+                  placeholder="At least 6 characters"
+                  className="w-full pl-9 pr-12 py-3 text-xs font-bold rounded-xl bg-gray-50 border-0 outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-1 focus:ring-[#1F7A4D]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 inset-y-0 my-auto text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center border-0 bg-transparent cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <p className="text-xs font-bold text-red-500">{error}</p>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#1F7A4D] hover:bg-[#19633E] text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 active:scale-97 flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-[#1F7A4D]/15 border-0"
+            >
+              {loading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </form>
+
+          {/* Footer Redirect */}
+          <p className="mt-8 text-center text-xs font-bold text-gray-400">
+            Already have an account?{" "}
+            <Link to="/login" className="text-[#1F7A4D] hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+
       </section>
     </main>
   );

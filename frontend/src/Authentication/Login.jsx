@@ -1,28 +1,27 @@
-
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAuthError, loginUser } from "../redux/slices/authSlice";
+import { Shield, Sparkles, User, Key, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
     const [showPassword, setShowPassword] = useState(false);
-    const [input,setInput] = useState({
+    const [input, setInput] = useState({
         email: "",
-        password:""
+        password: ""
     }); 
 
     const HandleInput = (e) => {
-       const {name,value} = e.target;
+       const { name, value } = e.target;
        if (error) {
         dispatch(clearAuthError());
        }
-       setInput(prev => ({...prev,[name]: value}))
-    }
+       setInput(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,182 +29,181 @@ export const Login = () => {
 
         try {
             await dispatch(loginUser(input)).unwrap();
-            toast.success('Login successful');
+            toast.success('Welcome back to SupplyLens!');
             navigate('/dashboard', { replace: true });
         } catch (err) {
-                        const message = typeof err === 'string' ? err : (err?.message || 'Invalid credentials');
+            const message = typeof err === 'string' ? err : (err?.message || 'Invalid credentials');
             toast.error(message);
         }
     };
 
-        useEffect(() => {
-            if (isAuthenticated) {
-                navigate('/dashboard', { replace: true });
-            }
-        }, [isAuthenticated, navigate]);
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [isAuthenticated, navigate]);
 
     return (
-        <main className="login-shell relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 sm:py-12">
+        <main className="relative min-h-screen bg-[#F8FAF8] text-[#111A16] flex items-center justify-center px-4 py-12 overflow-hidden select-none">
+            {/* Background elements matching landing page */}
             <div className="pointer-events-none absolute inset-0">
-                <div className="login-blob login-blob-one" />
-                <div className="login-blob login-blob-two" />
-                <div className="login-grid" />
+                <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#1F7A4D]/5 blur-3xl" />
+                <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-400/5 blur-3xl" />
+                <div 
+                    className="absolute inset-0 opacity-15"
+                    style={{
+                        backgroundImage: "radial-gradient(#1F7A4D 1px, transparent 1px)",
+                        backgroundSize: "28px 28px",
+                    }}
+                />
             </div>
 
-            <section className="login-card relative z-10 mx-auto grid w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/70 bg-white/80 shadow-[0_20px_80px_-30px_rgba(25,35,45,0.45)] backdrop-blur-sm md:grid-cols-[1.1fr_1fr]">
-                <aside className="hidden md:flex flex-col justify-between bg-[#102a43] p-10 text-[#fefdf8]">
-                    <div className="login-reveal" style={{ animationDelay: "80ms" }}>
-                        <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase">
-                            SupplyLens
-                            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                        </p>
-                        <h1 className="text-4xl font-black leading-tight">
-                            Welcome back to
-                            <span className="block text-[#f6c453]">command center.</span>
+            {/* Login Card Grid */}
+            <section className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[32px] border border-gray-100 bg-white/95 shadow-xl shadow-gray-100/50 backdrop-blur-md grid grid-cols-1 md:grid-cols-[1.1fr_1fr]">
+                
+                {/* Left Panel - Dark Forest Green Panel */}
+                <aside className="hidden md:flex flex-col justify-between bg-[#111A16] p-12 text-[#F8FAF8] relative">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1F7A4D]/10 to-transparent pointer-events-none" />
+                    
+                    <div className="relative z-10">
+                        <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#1F7A4D] to-[#2DA96A] flex items-center justify-center shadow-sm">
+                                <span className="text-white font-black text-sm">S</span>
+                            </div>
+                            <span className="text-base font-bold tracking-tight text-white">
+                                Supply <span className="text-[#2DA96A]">Lens</span>
+                            </span>
+                        </Link>
+
+                        <h1 className="text-3xl font-black leading-tight tracking-tight mt-6">
+                            Welcome back to <br />
+                            <span className="text-[#2DA96A] italic font-serif font-semibold">SupplyLens.</span>
                         </h1>
-                        <p className="mt-5 max-w-sm text-sm leading-7 text-[#d9e2ec]">
-                            Track inventory flow, shipment health, and supplier risks from one
-                            place with live operational insights.
+                        <p className="mt-4 text-xs text-gray-400 font-medium leading-relaxed max-w-xs">
+                            Track global inventory, optimize supply chain nodes, and coordinate shipments from a single unified workspace.
                         </p>
                     </div>
 
-                    <div className="login-reveal" style={{ animationDelay: "220ms" }}>
-                        <div className="rounded-2xl border border-white/20 bg-white/10 p-5">
-                            <p className="text-xs uppercase tracking-[0.16em] text-[#9fb3c8]">
-                                Daily snapshot
-                            </p>
-                            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-                                <div>
-                                    <p className="text-2xl font-black">98.4%</p>
-                                    <p className="text-[11px] uppercase tracking-wider text-[#bcccdc]">
-                                        On-Time
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black">42</p>
-                                    <p className="text-[11px] uppercase tracking-wider text-[#bcccdc]">
-                                        Alerts
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl font-black">17</p>
-                                    <p className="text-[11px] uppercase tracking-wider text-[#bcccdc]">
-                                        Regions
-                                    </p>
-                                </div>
+                    {/* Operational snapshot */}
+                    <div className="relative z-10 bg-white/5 border border-white/10 p-5 rounded-2xl">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#2DA96A] mb-3">OPERATIONAL HIGHLIGHTS</p>
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                            <div>
+                                <p className="text-lg font-black">98.4%</p>
+                                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">On-Time</p>
+                            </div>
+                            <div>
+                                <p className="text-lg font-black">12</p>
+                                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">Alerts</p>
+                            </div>
+                            <div>
+                                <p className="text-lg font-black">17</p>
+                                <p className="text-[8px] uppercase tracking-widest text-gray-400 mt-1 font-bold">Hubs</p>
                             </div>
                         </div>
                     </div>
                 </aside>
 
-                <div className="bg-[#fffaf1] p-7 sm:p-10">
-                    <div className="login-reveal mb-8 flex items-center justify-between" style={{ animationDelay: "40ms" }}>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#486581]">
-                            Secure Login
-                        </p>
-                        <Link
-                            to="/"
-                            className="rounded-full border border-[#bcccdc] px-4 py-1.5 text-xs font-semibold text-[#334e68] transition hover:border-[#486581] hover:text-[#102a43]"
+                {/* Right Panel - Form */}
+                <div className="p-8 sm:p-12 flex flex-col justify-center bg-white">
+                    <div className="flex items-center justify-between mb-8">
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Secure Access</span>
+                        <Link 
+                            to="/" 
+                            className="text-xs font-bold text-gray-500 hover:text-[#1F7A4D] border border-gray-150 px-4 py-2 rounded-xl transition-colors bg-white hover:bg-gray-50"
                         >
                             Back Home
                         </Link>
                     </div>
 
-                    <div className="login-reveal" style={{ animationDelay: "120ms" }}>
-                        <h2 className="text-3xl sm:text-4xl font-black text-[#102a43]">
-                            Sign in
-                        </h2>
-                        <p className="mt-3 text-sm leading-6 text-[#486581]">
-                            Use your work credentials to access your operations dashboard.
-                        </p>
-                    </div>
+                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">Sign In</h2>
+                    <p className="text-xs text-gray-400 font-semibold mt-1">Enter your credentials to access your operations dashboard.</p>
 
-                    <form onSubmit={handleSubmit} className="mt-8 space-y-5 login-reveal" style={{ animationDelay: "180ms" }}>
+                    <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
+                        {/* Email */}
                         <div>
-                            <label
-                                htmlFor="email"
-                                className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-[#334e68]"
-                            >
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                name="email"
-                                onChange={HandleInput}
-                                value={input.email}
-                                required
-                                placeholder="name@company.com"
-                                className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
-                            />
+                            <label className="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-2">EMAIL ADDRESS</label>
+                            <div className="relative">
+                                <User size={14} className="absolute left-3.5 inset-y-0 my-auto text-gray-400" />
+                                <input
+                                    type="email"
+                                    name="email"
+                                    required
+                                    value={input.email}
+                                    onChange={HandleInput}
+                                    placeholder="name@company.com"
+                                    className="w-full pl-9 pr-4 py-3 text-xs font-bold rounded-xl bg-gray-50 border-0 outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-1 focus:ring-[#1F7A4D]"
+                                />
+                            </div>
                         </div>
 
+                        {/* Password */}
                         <div>
-                            <div className="mb-2 flex items-center justify-between">
-                                <label
-                                    htmlFor="password"
-                                    className="block text-xs font-bold uppercase tracking-[0.14em] text-[#334e68]"
-                                >
-                                    Password
-                                </label>
-                                <button
-                                    type="button"
-                                    className="text-xs font-semibold text-[#486581] transition hover:text-[#102a43]"
-                                >
-                                    Forgot?
-                                </button>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-[10px] font-extrabold uppercase tracking-widest text-gray-400">PASSWORD</label>
+                                <button type="button" className="text-[10px] font-bold text-gray-400 hover:text-[#1F7A4D]">Forgot password?</button>
                             </div>
                             <div className="relative">
+                                <Key size={14} className="absolute left-3.5 inset-y-0 my-auto text-gray-400" />
                                 <input
-                                    id="password"
                                     type={showPassword ? "text" : "password"}
                                     name="password"
+                                    required
                                     value={input.password}
                                     onChange={HandleInput}
-                                    required
-                                    placeholder="Enter your password"
-                                    className="w-full rounded-xl border border-[#d9e2ec] bg-white px-4 py-3 pr-20 text-sm text-[#102a43] outline-none transition placeholder:text-[#9fb3c8] focus:border-[#f6ad55] focus:ring-4 focus:ring-[#f7d7a8]/60"
+                                    placeholder="••••••••"
+                                    className="w-full pl-9 pr-12 py-3 text-xs font-bold rounded-xl bg-gray-50 border-0 outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-1 focus:ring-[#1F7A4D]"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword((prev) => !prev)}
-                                    className="absolute inset-y-0 right-2 my-auto h-9 rounded-lg px-3 text-xs font-bold uppercase tracking-wide text-[#486581] transition hover:bg-[#f0f4f8] hover:text-[#102a43]"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3.5 inset-y-0 my-auto text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center border-0 bg-transparent cursor-pointer"
                                 >
-                                    {showPassword ? "Hide" : "Show"}
+                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                                 </button>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between gap-4 pt-1">
-                            <label className="flex items-center gap-2 text-sm text-[#334e68]">
-                                <input
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-[#9fb3c8] text-[#f08c2e] focus:ring-[#f7d7a8]"
+                        {/* Remember me */}
+                        <div className="flex items-center justify-between text-xs font-bold text-gray-500 mt-1">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input 
+                                    type="checkbox" 
+                                    className="rounded border-gray-300 text-[#1F7A4D] focus:ring-[#1F7A4D]/25" 
                                 />
                                 Remember me
                             </label>
-                            <p className="text-xs text-[#627d98]">Encrypted session</p>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase">Secure Connection</span>
                         </div>
 
-                        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+                        {/* Error output */}
+                        {error && (
+                            <p className="text-xs font-bold text-red-500">{error}</p>
+                        )}
 
+                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f08c2e] px-4 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#102a43] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f6ad55] active:translate-y-0"
+                            className="w-full bg-[#1F7A4D] hover:bg-[#19633E] text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 active:scale-97 flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-[#1F7A4D]/15 border-0"
                         >
-                            {loading ? "Logging in..." : "Log In"}
-                            <span className="transition group-hover:translate-x-1">→</span>
+                            {loading ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                                "Log In"
+                            )}
                         </button>
                     </form>
 
-                    <p className="login-reveal mt-7 text-center text-sm text-[#486581]" style={{ animationDelay: "260ms" }}>
+                    {/* Footer redirect */}
+                    <p className="mt-8 text-center text-xs font-bold text-gray-400">
                         New to SupplyLens?{" "}
-                        <Link to="/register" className="font-bold text-[#102a43] underline decoration-[#f6c453] underline-offset-4">
-                            Create account
+                        <Link to="/register" className="text-[#1F7A4D] hover:underline">
+                            Create an account
                         </Link>
                     </p>
                 </div>
+
             </section>
         </main>
     );
