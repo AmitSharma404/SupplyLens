@@ -27,6 +27,17 @@ const supplierSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    averageDeliveryDays: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    reliabilityScore: {
+        type: Number,
+        default: 100,
+        min: 0,
+        max: 100
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

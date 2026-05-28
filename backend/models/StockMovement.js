@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const stockMovementSchema = new mongoose.Schema({
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true
+    },
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -8,7 +13,7 @@ const stockMovementSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["in", "out", "adjustment"],
+        enum: ["in", "out", "adjustment", "IN", "OUT", "ADJUSTMENT"],
         required: true
     },
     quantity: {
@@ -16,9 +21,22 @@ const stockMovementSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+    previousStock: {
+        type: Number,
+        required: true
+    },
+    newStock: {
+        type: Number,
+        required: true
+    },
     reason: {
         type: String,
         required: true // e.g., "Supplier Shipment", "Sale", "Damage", "Manual Correction"
+    },
+    performedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +44,36 @@ const stockMovementSchema = new mongoose.Schema({
         required: true
     }
 }, { timestamps: true });
+
+// Pre-validate hook for initial field synchronization
+stockMovementSchema.pre('validate', function() {
+    if (this.productId !== undefined && this.product === undefined) {
+        this.product = this.productId;
+    } else if (this.product !== undefined && this.productId === undefined) {
+        this.productId = this.product;
+    }
+
+    if (this.performedBy !== undefined && this.user === undefined) {
+        this.user = this.performedBy;
+    } else if (this.user !== undefined && this.performedBy === undefined) {
+        this.performedBy = this.user;
+    }
+});
+
+// Pre-save hook to keep fields in sync upon modifications
+stockMovementSchema.pre('save', function() {
+    if (this.isModified('productId')) {
+        this.product = this.productId;
+    } else if (this.isModified('product')) {
+        this.productId = this.product;
+    }
+
+    if (this.isModified('performedBy')) {
+        this.user = this.performedBy;
+    } else if (this.isModified('user')) {
+        this.performedBy = this.user;
+    }
+});
 
 const StockMovement = mongoose.model("StockMovement", stockMovementSchema);
 

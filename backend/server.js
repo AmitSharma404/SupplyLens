@@ -8,6 +8,7 @@ import productRouter from './routes/productRoutes.js';
 import supplierRouter from './routes/supplierRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
 import dashboardRouter from './routes/dashboardRoutes.js';
+import stockRouter from './routes/stockRoutes.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/products', productRouter);
 app.use('/api/suppliers', supplierRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/stock', stockRouter);
 
 
 

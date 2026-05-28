@@ -8,6 +8,31 @@ import Supplier from "../models/Supplier.js";
 // @access  Private
 export const createProduct = async (req, res) => {
     try {
+        // Synchronize request body parameters
+        if (req.body.unitPrice !== undefined && req.body.price === undefined) {
+            req.body.price = req.body.unitPrice;
+        } else if (req.body.price !== undefined && req.body.unitPrice === undefined) {
+            req.body.unitPrice = req.body.price;
+        }
+
+        if (req.body.currentStock !== undefined && req.body.stockQuantity === undefined) {
+            req.body.stockQuantity = req.body.currentStock;
+        } else if (req.body.stockQuantity !== undefined && req.body.currentStock === undefined) {
+            req.body.currentStock = req.body.stockQuantity;
+        }
+
+        if (req.body.minimumStockLevel !== undefined && req.body.lowStockThreshold === undefined) {
+            req.body.lowStockThreshold = req.body.minimumStockLevel;
+        } else if (req.body.lowStockThreshold !== undefined && req.body.minimumStockLevel === undefined) {
+            req.body.minimumStockLevel = req.body.lowStockThreshold;
+        }
+
+        if (req.body.supplierId !== undefined && req.body.supplier === undefined) {
+            req.body.supplier = req.body.supplierId;
+        } else if (req.body.supplier !== undefined && req.body.supplierId === undefined) {
+            req.body.supplierId = req.body.supplier;
+        }
+
         const { name, sku, description, category, price, stockQuantity, lowStockThreshold, supplier } = req.body;
 
         if (!name || !sku || price === undefined || !supplier) {
@@ -92,6 +117,31 @@ export const getProductById = async (req, res) => {
 // @access  Private/Admin
 export const updateProduct = async (req, res) => {
     try {
+        // Synchronize request body parameters
+        if (req.body.unitPrice !== undefined && req.body.price === undefined) {
+            req.body.price = req.body.unitPrice;
+        } else if (req.body.price !== undefined && req.body.unitPrice === undefined) {
+            req.body.unitPrice = req.body.price;
+        }
+
+        if (req.body.currentStock !== undefined && req.body.stockQuantity === undefined) {
+            req.body.stockQuantity = req.body.currentStock;
+        } else if (req.body.stockQuantity !== undefined && req.body.currentStock === undefined) {
+            req.body.currentStock = req.body.stockQuantity;
+        }
+
+        if (req.body.minimumStockLevel !== undefined && req.body.lowStockThreshold === undefined) {
+            req.body.lowStockThreshold = req.body.minimumStockLevel;
+        } else if (req.body.lowStockThreshold !== undefined && req.body.minimumStockLevel === undefined) {
+            req.body.minimumStockLevel = req.body.lowStockThreshold;
+        }
+
+        if (req.body.supplierId !== undefined && req.body.supplier === undefined) {
+            req.body.supplier = req.body.supplierId;
+        } else if (req.body.supplier !== undefined && req.body.supplierId === undefined) {
+            req.body.supplierId = req.body.supplier;
+        }
+
         let product = await Product.findById(req.params.id);
 
         if (!product) {
