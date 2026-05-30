@@ -165,6 +165,28 @@ export const stockOut = async (data) => {
     }
 }
 
+export const stockSell = async (data) => {
+    try {
+        return await request('/stock/sell', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+export const stockAdjust = async (data) => {
+    try {
+        return await request('/stock/adjust', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
 export const getStockHistory = async (productId) => {
     try {
         return await request(`/stock/history/${productId}`);
@@ -188,6 +210,45 @@ export const createOrder = async (orderData) => {
             method: 'POST',
             body: JSON.stringify(orderData),
         });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+export const updateOrderStatus = async (id, status) => {
+    try {
+        return await request(`/orders/${id}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status }),
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+// --- Alert Endpoints ---
+export const getAlerts = async (read = false) => {
+    try {
+        return await request(`/alerts?read=${read}`);
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+export const markAlertRead = async (id) => {
+    try {
+        return await request(`/alerts/${id}/read`, {
+            method: 'PUT'
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+// --- Forecast Endpoints ---
+export const getForecast = async (productId) => {
+    try {
+        return await request(`/forecast/${productId}`);
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }

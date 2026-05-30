@@ -1,17 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AlertRow from '../components/app/AlertRow';
-
-const allAlerts = [
-  { id: 1, dot: 'red', message: 'Wheat Flour 10kg stock critical — 12 units', subLabel: 'Warehouse A', priority: 'high', date: 'Just now' },
-  { id: 2, dot: 'amber', message: 'Sunflower Oil approaching reorder threshold', subLabel: 'Auto-reorder available', priority: 'medium', date: '2h ago' },
-  { id: 3, dot: 'red', message: 'Cooking Oil 20L below safety buffer', subLabel: '8 units left', priority: 'high', date: '4h ago' },
-  { id: 4, dot: 'blue', message: 'QuickShip delivery delayed — ETA June 2', subLabel: 'ORD-0038', priority: 'low', date: '6h ago' },
-  { id: 5, dot: 'amber', message: 'Packaging Bags reorder needed in 3 days', subLabel: '33 units', priority: 'medium', date: '1d ago' },
-  { id: 6, dot: 'amber', message: 'Sugar demand spike predicted next month', subLabel: '+40% forecast', priority: 'medium', date: '1d ago' },
-  { id: 7, dot: 'blue', message: 'GrainMasters reliability improved to 89%', subLabel: 'Up from 82%', priority: 'low', date: '2d ago' },
-  { id: 8, dot: 'red', message: 'MetroSupply integration sync failed', subLabel: '48h ago', priority: 'high', date: '2d ago' },
-];
+import { getAlerts, markAlertRead } from '../Instance/API';
 
 const tabs = [
   { key: 'all', label: 'All' },
@@ -22,10 +12,65 @@ const tabs = [
 
 const Alerts = () => {
   const [activeTab, setActiveTab] = useState('all');
-  const [alerts, setAlerts] = useState(allAlerts);
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
+
+  const fetchAlerts = async () => {
+    try {
+      setLoading(true);
+      const res = await getAlerts(false); // get unread alerts
+      
+      const mappedAlerts = (res.data || []).map(a => {
+          let dot = 'blue';
+          let priority = a.priority?.toLowerCase() || 'medium';
+          if (a.type === 'SUPPLIER_DELAY') dot = 'amber';
+          if (a.type === 'LOW_STOCK') dot = 'red';
+          if (a.type === 'REORDER_RECOMMENDED') dot = 'green';
+          
+          return {
+              id: a._id,
+              dot,
+              message: a.message,
+              subLabel: a.productId ? `${a.productId.name} (${a.productId.sku})` : '',
+              priority,
+              date: new Date(a.createdAt).toLocaleDateString()
+          };
+      });
+      setAlerts(mappedAlerts);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDismiss = async (id) => {
+    try {
+        await markAlertRead(id);
+        setAlerts(p => p.filter(x => x.id !== id));
+    } catch (err) {
+        console.error("Failed to dismiss alert");
+    }
+  };
 
   const filtered = activeTab === 'all' ? alerts : alerts.filter(a => a.priority === activeTab);
   const counts = { all: alerts.length, high: alerts.filter(a => a.priority === 'high').length, medium: alerts.filter(a => a.priority === 'medium').length, low: alerts.filter(a => a.priority === 'low').length };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse flex flex-col gap-4 w-full max-w-[800px]">
+            {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-16 bg-gray-200 rounded-[8px]" style={{ background: 'var(--app-overlay)' }}></div>
+            ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div className="p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -52,10 +97,10 @@ const Alerts = () => {
       <div className="rounded-[12px]" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
         <AnimatePresence mode="popLayout">
           {filtered.length > 0 ? filtered.map((a, i) => (
-            <AlertRow key={a.id} {...a} index={i} onDismiss={() => setAlerts(p => p.filter(x => x.id !== a.id))} />
+            <AlertRow key={a.id} {...a} index={i} onDismiss={() => handleDismiss(a.id)} />
           )) : (
             <motion.div key="empty" className="py-16 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <p style={{ fontSize: '14px', color: 'var(--app-text-muted)' }}>No alerts</p>
+              <p style={{ fontSize: '14px', color: 'var(--app-text-muted)' }}>No alerts found in this category.</p>
             </motion.div>
           )}
         </AnimatePresence>

@@ -56,8 +56,14 @@ const Suppliers = () => {
     <motion.div className="p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
       <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px', marginBottom: '32px' }}>Suppliers</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {suppliers && suppliers.map((s, i) => {
+      {suppliers?.length === 0 ? (
+          <div className="py-16 text-center w-full" style={{ border: '1px dashed var(--app-border)', borderRadius: '12px' }}>
+              <p style={{ color: 'var(--app-text-muted)', fontSize: '14px' }}>No suppliers found. Create your first supplier.</p>
+              <button className="mt-4 inline-block text-[13px] font-medium border-0 cursor-pointer" style={{ color: 'var(--accent)', background: 'transparent' }}>+ Add Supplier</button>
+          </div>
+      ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {suppliers && suppliers.map((s, i) => {
           const score = s.reliabilityScore || 100;
           const color = getSupplierColor(score);
           return (
@@ -82,6 +88,7 @@ const Suppliers = () => {
           );
         })}
       </div>
+      )}
     </motion.div>
   );
 };

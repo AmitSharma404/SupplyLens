@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Trash2, Filter } from 'lucide-react';
+import { Search, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, removeProduct } from '../redux/slices/productSlice';
 import StatusPill from '../components/app/StatusPill';
+import { stockSell, stockAdjust } from '../Instance/API';
 
-const calculateStatus = (stock, min) => {
-  if (stock <= 0) return 'critical';
-  if (stock <= min) return 'reorder-soon';
-  return 'in-stock';
+const calculateStatus = (stock, min, safety) => {
+  if (stock === 0) return 'out-of-stock';
+  if (stock <= (safety || 0)) return 'critical';
+  if (stock <= min) return 'low-stock';
+  return 'healthy';
 };
 
 const stockBarColor = (ratio) => ratio > 0.5 ? 'var(--green)' : ratio > 0.25 ? 'var(--amber)' : 'var(--red)';
@@ -21,27 +23,95 @@ const Inventory = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
+  // Modals state
+  const [saleModalOpen, setSaleModalOpen] = useState(false);
+  const [adjustModalOpen, setAdjustModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const [quantity, setQuantity] = useState('');
+  const [customerRef, setCustomerRef] = useState('');
+  const [note, setNote] = useState('');
+  
+  const [adjustType, setAdjustType] = useState('ADD');
+  const [adjustReason, setAdjustReason] = useState('Physical Count Correction');
+
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
   const filtered = (products || []).filter(p => {
-    const status = calculateStatus(p.currentStock || 0, p.lowStockThreshold || 10);
+    const status = calculateStatus(p.currentStock || 0, p.minimumStockLevel || 5, p.safetyStock || 0);
     const matchesSearch = p.name?.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = filter === 'all' || status === filter;
     return matchesSearch && matchesFilter;
   });
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("Are you sure you want to delete this product? This will remove all associated stock history.")) {
       dispatch(removeProduct(id));
     }
   };
 
-  if (loading) {
+  const handleSaleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await stockSell({
+        productId: selectedProduct._id || selectedProduct.id,
+        quantity: Number(quantity),
+        customerRef,
+        note
+      });
+      alert("Sale recorded. Stock updated.");
+      setSaleModalOpen(false);
+      dispatch(fetchProducts()); // refresh
+    } catch (err) {
+      alert(err.message || "Failed to record sale");
+    }
+  };
+
+  const handleAdjustSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await stockAdjust({
+        productId: selectedProduct._id || selectedProduct.id,
+        adjustmentType: adjustType,
+        quantity: Number(quantity),
+        reason: adjustReason,
+        notes: note
+      });
+      alert("Stock adjusted.");
+      setAdjustModalOpen(false);
+      dispatch(fetchProducts()); // refresh
+    } catch (err) {
+      alert(err.message || "Failed to adjust stock");
+    }
+  };
+
+  const openSaleModal = (product) => {
+    setSelectedProduct(product);
+    setQuantity('');
+    setCustomerRef('');
+    setNote('');
+    setSaleModalOpen(true);
+  };
+
+  const openAdjustModal = (product) => {
+    setSelectedProduct(product);
+    setQuantity('');
+    setAdjustType('ADD');
+    setAdjustReason('Physical Count Correction');
+    setNote('');
+    setAdjustModalOpen(true);
+  };
+
+  if (loading && (!products || products.length === 0)) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse" style={{ color: 'var(--app-text-muted)' }}>Loading inventory...</div>
+        <div className="animate-pulse flex flex-col gap-4 w-full">
+            {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded-[8px]" style={{ background: 'var(--app-overlay)' }}></div>
+            ))}
+        </div>
       </div>
     );
   }
@@ -64,8 +134,8 @@ const Inventory = () => {
       </div>
 
       {/* Search + Filter */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-[320px]">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="relative flex-1 min-w-[200px] max-w-[320px]">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--app-text-muted)' }} />
           <input
             type="text"
@@ -78,8 +148,8 @@ const Inventory = () => {
             onBlur={e => { e.target.style.borderColor = 'var(--app-border)'; e.target.style.boxShadow = 'none'; }}
           />
         </div>
-        <div className="flex gap-1">
-          {['all', 'in-stock', 'reorder-soon', 'critical'].map(f => (
+        <div className="flex gap-1 flex-wrap">
+          {['all', 'healthy', 'low-stock', 'critical', 'out-of-stock'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -92,7 +162,7 @@ const Inventory = () => {
                 border: filter === f ? '1px solid var(--accent)' : '1px solid var(--app-border)',
               }}
             >
-              {f === 'all' ? 'All' : f.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {f === 'all' ? 'All' : f.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </button>
           ))}
         </div>
@@ -103,8 +173,8 @@ const Inventory = () => {
         <table className="w-full" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--app-border)', background: 'var(--app-surface)' }}>
-              {['Product', 'SKU', 'Category', 'Stock', 'Status', ''].map(h => (
-                <th key={h} className="text-left py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>
+              {['Product', 'SKU', 'Stock', 'Status', 'Actions'].map(h => (
+                <th key={h} className={h === 'Actions' ? "text-right py-3 px-4" : "text-left py-3 px-4"} style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>
                   {h}
                 </th>
               ))}
@@ -112,11 +182,19 @@ const Inventory = () => {
           </thead>
           <tbody>
             <AnimatePresence>
-              {filtered.map((p, i) => {
+              {filtered.length === 0 ? (
+                <tr>
+                    <td colSpan="5" className="py-16 text-center">
+                        <p style={{ color: 'var(--app-text-muted)', fontSize: '14px' }}>No products found. Add your first product.</p>
+                        <Link to="/dashboard/inventory/add" className="mt-4 inline-block text-[13px] font-medium" style={{ color: 'var(--accent)' }}>+ Add Product</Link>
+                    </td>
+                </tr>
+              ) : filtered.map((p, i) => {
                 const stock = p.currentStock || 0;
-                const max = 1000; // Mock max for visualization since schema doesn't have it
+                const min = p.minimumStockLevel || 5;
+                const max = min * 2;
                 const ratio = Math.min(stock / max, 1);
-                const status = calculateStatus(stock, p.lowStockThreshold || 10);
+                const status = calculateStatus(stock, min, p.safetyStock);
                 return (
                   <motion.tr
                     key={p._id || p.id}
@@ -129,9 +207,11 @@ const Inventory = () => {
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--app-overlay)'; e.currentTarget.style.borderLeft = '2px solid var(--accent)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeft = '2px solid transparent'; }}
                   >
-                    <td className="py-3 px-4" style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>{p.name}</td>
+                    <td className="py-3 px-4">
+                        <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>{p.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--app-text-muted)' }}>{p.category}</div>
+                    </td>
                     <td className="py-3 px-4" style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--app-text-muted)' }}>{p.sku}</td>
-                    <td className="py-3 px-4" style={{ fontSize: '13px', color: 'var(--app-text-muted)' }}>{p.category}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)', fontFamily: 'var(--font-mono)' }}>{stock}</span>
@@ -146,15 +226,25 @@ const Inventory = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4"><StatusPill status={status} /></td>
+                    <td className="py-3 px-4">
+                        <StatusPill status={status} />
+                    </td>
                     <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleDelete(p._id || p.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer bg-transparent border-0 p-1"
-                        style={{ color: 'var(--app-text-muted)' }}
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                        <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => openSaleModal(p)} className="px-2 py-1 rounded-[6px] text-[12px] font-medium border cursor-pointer" style={{ borderColor: 'var(--accent)', color: 'var(--accent)', background: 'transparent' }}>
+                                Record Sale
+                            </button>
+                            <button onClick={() => openAdjustModal(p)} className="px-2 py-1 rounded-[6px] text-[12px] font-medium border cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" style={{ borderColor: 'var(--app-border)', color: 'var(--app-text-muted)', background: 'transparent' }}>
+                                Adjust
+                            </button>
+                            <button
+                                onClick={() => handleDelete(p._id || p.id)}
+                                className="cursor-pointer bg-transparent border-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{ color: 'var(--red)' }}
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        </div>
                     </td>
                   </motion.tr>
                 );
@@ -163,6 +253,73 @@ const Inventory = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Sale Modal */}
+      {saleModalOpen && selectedProduct && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+              <div className="rounded-[16px] p-6 w-full max-w-[400px]" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
+                  <h2 className="text-[18px] font-medium mb-4">Record Sale</h2>
+                  <form onSubmit={handleSaleSubmit} className="flex flex-col gap-4">
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Product</label>
+                          <input type="text" readOnly value={selectedProduct.name} className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'var(--app-overlay)', border: '1px solid var(--app-border)', color: 'var(--app-text-muted)' }} />
+                      </div>
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Quantity Sold (Max: {selectedProduct.currentStock})</label>
+                          <input type="number" required min="1" max={selectedProduct.currentStock} value={quantity} onChange={e=>setQuantity(e.target.value)} className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'transparent', border: '1px solid var(--app-border)', color: 'var(--app-text)' }} />
+                      </div>
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Customer Reference (Optional)</label>
+                          <input type="text" value={customerRef} onChange={e=>setCustomerRef(e.target.value)} placeholder="e.g. Invoice #1234" className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'transparent', border: '1px solid var(--app-border)', color: 'var(--app-text)' }} />
+                      </div>
+                      <div className="flex gap-3 justify-end mt-4">
+                          <button type="button" onClick={() => setSaleModalOpen(false)} className="px-4 py-2 rounded-[8px] text-[13px] border cursor-pointer" style={{ borderColor: 'var(--app-border)', background: 'transparent', color: 'var(--app-text)' }}>Cancel</button>
+                          <button type="submit" className="px-4 py-2 rounded-[8px] text-[13px] font-medium cursor-pointer border-0" style={{ background: 'var(--accent)', color: '#000' }}>Confirm Sale</button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      )}
+
+      {/* Adjust Modal */}
+      {adjustModalOpen && selectedProduct && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+              <div className="rounded-[16px] p-6 w-full max-w-[400px]" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
+                  <h2 className="text-[18px] font-medium mb-4">Adjust Stock</h2>
+                  <form onSubmit={handleAdjustSubmit} className="flex flex-col gap-4">
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Product</label>
+                          <input type="text" readOnly value={selectedProduct.name} className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'var(--app-overlay)', border: '1px solid var(--app-border)', color: 'var(--app-text-muted)' }} />
+                      </div>
+                      <div className="flex gap-4">
+                          <label className="flex items-center gap-2 text-[13px] text-[var(--app-text)]">
+                              <input type="radio" checked={adjustType==='ADD'} onChange={()=>setAdjustType('ADD')} /> Add
+                          </label>
+                          <label className="flex items-center gap-2 text-[13px] text-[var(--app-text)]">
+                              <input type="radio" checked={adjustType==='REMOVE'} onChange={()=>setAdjustType('REMOVE')} /> Remove
+                          </label>
+                      </div>
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Quantity to {adjustType === 'ADD' ? 'Add' : 'Remove'}</label>
+                          <input type="number" required min="1" max={adjustType === 'REMOVE' ? selectedProduct.currentStock : undefined} value={quantity} onChange={e=>setQuantity(e.target.value)} className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'transparent', border: '1px solid var(--app-border)', color: 'var(--app-text)' }} />
+                      </div>
+                      <div>
+                          <label className="text-[12px] text-[var(--app-text-muted)] mb-1 block">Reason</label>
+                          <select value={adjustReason} onChange={e=>setAdjustReason(e.target.value)} className="w-full p-2 rounded-[8px] text-[13px]" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', color: 'var(--app-text)' }}>
+                              <option value="Physical Count Correction">Physical Count Correction</option>
+                              <option value="Damage/Waste">Damage/Waste</option>
+                              <option value="Customer Return">Customer Return</option>
+                              <option value="Other">Other</option>
+                          </select>
+                      </div>
+                      <div className="flex gap-3 justify-end mt-4">
+                          <button type="button" onClick={() => setAdjustModalOpen(false)} className="px-4 py-2 rounded-[8px] text-[13px] border cursor-pointer" style={{ borderColor: 'var(--app-border)', background: 'transparent', color: 'var(--app-text)' }}>Cancel</button>
+                          <button type="submit" className="px-4 py-2 rounded-[8px] text-[13px] font-medium cursor-pointer border-0" style={{ background: 'var(--accent)', color: '#000' }}>Confirm Adjust</button>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      )}
     </motion.div>
   );
 };

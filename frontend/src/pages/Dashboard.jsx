@@ -79,10 +79,10 @@ const Dashboard = () => {
         animate="animate"
         variants={{ animate: { transition: { staggerChildren: 0.08 } } }}
       >
-        <StatCard label="Total Products" value={stats.totalProducts || 284} icon={Package} />
-        <StatCard label="Pending Orders" value={stats.pendingReordersCount || 12} icon={ShoppingCart} />
-        <StatCard label="Low Stock Items" value={stats.lowStockCount || 7} accentBorder="var(--amber)" icon={AlertTriangle} />
-        <StatCard label="Inventory Value" prefix="$" value={rawInventoryValue} icon={Package} />
+        <StatCard label="Products Needing Reorder" value={stats.productsNeedingReorder || 0} icon={Package} link="/dashboard/inventory" trend={4} />
+        <StatCard label="Orders Awaiting Approval" value={stats.pendingReordersCount || 0} icon={ShoppingCart} link="/dashboard/orders" trend={-2} />
+        <StatCard label="Low Stock Items" value={stats.lowStockCount || 0} accentBorder="var(--amber)" icon={AlertTriangle} link="/dashboard/inventory" trend={12} />
+        <StatCard label="Suppliers With Delays" value={stats.suppliersWithDelays || 0} accentBorder="var(--red)" icon={Users} link="/dashboard/suppliers" trend={-5} />
       </motion.div>
 
       {/* Charts Row */}
