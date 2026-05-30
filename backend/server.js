@@ -9,6 +9,8 @@ import supplierRouter from './routes/supplierRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
 import dashboardRouter from './routes/dashboardRoutes.js';
 import stockRouter from './routes/stockRoutes.js';
+import alertRouter from './routes/alertRoutes.js';
+import forecastRouter from './routes/forecastRoutes.js';
 import cookieParser from 'cookie-parser';
 const app = express();
 
@@ -30,6 +32,8 @@ app.use('/api/suppliers', supplierRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/stock', stockRouter);
+app.use('/api/alerts', alertRouter);
+app.use('/api/forecast', forecastRouter);
 
 
 

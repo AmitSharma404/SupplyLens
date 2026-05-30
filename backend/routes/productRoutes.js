@@ -6,9 +6,10 @@ import {
     updateProduct,
     deleteProduct,
     createStockMovement,
-    getProductMovements
+    getProductMovements,
+    getReorderPoint
 } from "../controllers/productController.js";
-import { protectedRoute, adminRoute } from "../middleware/authMiddleware.js";
+import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
 
 const productRouter = express.Router();
 
@@ -18,12 +19,15 @@ productRouter.route("/")
 
 productRouter.route("/:id")
     .get(protectedRoute, getProductById)
-    .put(protectedRoute, adminRoute, updateProduct) // Admin only
-    .delete(protectedRoute, adminRoute, deleteProduct); // Admin only
+    .put(protectedRoute, verifyRole(["admin"]), updateProduct)
+    .delete(protectedRoute, verifyRole(["admin"]), deleteProduct);
 
 productRouter.route("/:id/movements")
     .post(protectedRoute, createStockMovement)
     .get(protectedRoute, getProductMovements);
+
+productRouter.route("/:id/reorder-point")
+    .get(protectedRoute, getReorderPoint);
 
 
 export default productRouter;

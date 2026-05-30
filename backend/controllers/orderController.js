@@ -2,6 +2,8 @@ import PurchaseOrder from "../models/PurchaseOrder.js";
 import Product from "../models/Product.js";
 import StockMovement from "../models/StockMovement.js";
 import Supplier from "../models/Supplier.js";
+import Notification from "../models/Notification.js";
+import { calculateReorderPoint, recalculateSupplierScore } from "../utils/inventoryUtils.js";
 
 // @desc    Create a new purchase order
 // @route   POST /api/orders
@@ -56,13 +58,29 @@ export const createPurchaseOrder = async (req, res) => {
 // @access  Private
 export const getPurchaseOrders = async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const total = await PurchaseOrder.countDocuments({});
         const purchaseOrders = await PurchaseOrder.find({})
             .populate("supplier", "name contactPerson email phone")
             .populate("items.product", "name sku category price")
             .populate("user", "name email")
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.status(200).json({ success: true, count: purchaseOrders.length, purchaseOrders });
+        res.status(200).json({ 
+            success: true, 
+            data: purchaseOrders,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message || "Server Error" });
     }
@@ -100,20 +118,41 @@ export const updateOrderStatus = async (req, res) => {
             for (const item of purchaseOrder.items) {
                 const product = await Product.findById(item.product);
                 if (product) {
+                    const previousStock = product.currentStock;
+                    const parsedQuantity = Number(item.quantity);
+                    const newStock = previousStock + parsedQuantity;
+                    
                     // Update product stock
-                    product.stockQuantity += Number(item.quantity);
+                    product.currentStock = newStock;
+                    product.stockQuantity = newStock;
                     await product.save();
 
                     // Create log movement
                     await StockMovement.create({
+                        productId: product._id,
                         product: product._id,
-                        type: "in",
-                        quantity: Number(item.quantity),
-                        reason: `Purchase Order Delivered: ${purchaseOrder._id}`,
+                        type: "IN",
+                        quantity: parsedQuantity,
+                        previousStock,
+                        newStock,
+                        reason: `Order #${purchaseOrder._id} delivered`,
+                        performedBy: req.user._id,
                         user: req.user._id
                     });
+
+                    // Recalculate reorderPoint
+                    await calculateReorderPoint(product._id);
+
+                    // Mark REORDER_RECOMMENDED alerts as read for this product
+                    await Notification.updateMany(
+                        { productId: product._id, type: "REORDER_RECOMMENDED", read: false },
+                        { $set: { read: true } }
+                    );
                 }
             }
+            
+            // Recalculate supplier score
+            await recalculateSupplierScore(purchaseOrder.supplier);
         }
 
         purchaseOrder.status = status;

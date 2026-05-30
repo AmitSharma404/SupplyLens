@@ -4,15 +4,15 @@ import {
     getPurchaseOrders,
     updateOrderStatus
 } from "../controllers/orderController.js";
-import { protectedRoute, adminRoute } from "../middleware/authMiddleware.js";
+import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
 
 const orderRouter = express.Router();
 
 orderRouter.route("/")
-    .post(protectedRoute, createPurchaseOrder)
+    .post(protectedRoute, verifyRole(["manager", "admin"]), createPurchaseOrder)
     .get(protectedRoute, getPurchaseOrders);
 
 orderRouter.route("/:id/status")
-    .put(protectedRoute, adminRoute, updateOrderStatus);
+    .put(protectedRoute, verifyRole(["warehouse_staff", "manager", "admin"]), updateOrderStatus);
 
 export default orderRouter;

@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import StockMovement from "../models/StockMovement.js";
 import Supplier from "../models/Supplier.js";
+import { calculateReorderPoint } from "../utils/inventoryUtils.js";
 
 
 // @desc    Create a new product
@@ -88,8 +89,30 @@ export const createProduct = async (req, res) => {
 // @access  Private
 export const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({}).populate("supplier", "name email contactPerson phone").sort({ createdAt: -1 });
-        res.status(200).json({ success: true, count: products.length, products });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const sortBy = req.query.sortBy || "createdAt";
+        const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
+
+        const total = await Product.countDocuments({});
+        const products = await Product.find({})
+            .populate("supplier", "name email contactPerson phone")
+            .sort({ [sortBy]: sortOrder })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({ 
+            success: true, 
+            data: products,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server Error" });
     }
@@ -272,11 +295,63 @@ export const createStockMovement = async (req, res) => {
 export const getProductMovements = async (req, res) => {
     try {
         const productId = req.params.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const total = await StockMovement.countDocuments({ product: productId });
         const movements = await StockMovement.find({ product: productId })
             .populate("user", "name email")
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.status(200).json({ success: true, count: movements.length, movements });
+        res.status(200).json({ 
+            success: true, 
+            data: movements,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message || "Server Error" });
+    }
+};
+
+// @desc    Get reorder point for product
+// @route   GET /api/products/:id/reorder-point
+// @access  Private
+export const getReorderPoint = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const product = await Product.findById(productId).populate('supplier');
+        if (!product) return res.status(404).json({ success: false, message: "Product not found" });
+
+        const reorderPoint = await calculateReorderPoint(productId);
+        
+        // Let's manually calculate average daily demand for the response payload
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const movements = await StockMovement.find({
+            productId: product._id,
+            type: "SOLD",
+            createdAt: { $gte: thirtyDaysAgo }
+        });
+        const totalSold = movements.reduce((sum, mov) => sum + mov.quantity, 0);
+        const averageDailyDemand = totalSold / 30;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                reorderPoint,
+                averageDailyDemand,
+                supplierLeadDays: product.supplier ? product.supplier.averageDeliveryDays : 0,
+                safetyStock: product.safetyStock
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message || "Server Error" });
     }

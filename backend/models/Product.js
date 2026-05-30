@@ -59,6 +59,11 @@ const productSchema = new mongoose.Schema({
         default: 0,
         min: 0
     },
+    reorderPoint: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -129,6 +134,9 @@ productSchema.pre('save', function() {
         this.supplierId = this.supplier;
     }
 });
+
+productSchema.index({ currentStock: 1 });
+productSchema.index({ supplierId: 1 });
 
 const Product = mongoose.model("Product", productSchema);
 

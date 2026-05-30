@@ -27,23 +27,9 @@ export const register = async (req, res) => {
 
     await newUser.save();
 
-    const token = jwt.sign(
-      { id: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" },
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, // Required for cross-domain cookies
-      sameSite: "none", // Required for cross-domain cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role },
+      message: "User registered successfully, please log in",
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });

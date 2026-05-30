@@ -1,4 +1,5 @@
 import Supplier from "../models/Supplier.js";
+import PurchaseOrder from "../models/PurchaseOrder.js";
 
 // @desc    Create a new supplier
 // @route   POST /api/suppliers
@@ -36,8 +37,26 @@ export const createSupplier = async (req, res) => {
 // @access  Private
 export const getSuppliers = async (req, res) => {
     try {
-        const suppliers = await Supplier.find({}).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, count: suppliers.length, suppliers });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const total = await Supplier.countDocuments({});
+        const suppliers = await Supplier.find({})
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+            
+        res.status(200).json({ 
+            success: true, 
+            data: suppliers,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server Error" });
     }
@@ -97,6 +116,43 @@ export const deleteSupplier = async (req, res) => {
         await supplier.deleteOne();
 
         res.status(200).json({ success: true, message: "Supplier removed" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+// @desc    Get supplier score breakdown
+// @route   GET /api/suppliers/:id/score-breakdown
+// @access  Private
+export const getSupplierScoreBreakdown = async (req, res) => {
+    try {
+        const supplierId = req.params.id;
+        const supplier = await Supplier.findById(supplierId);
+        if (!supplier) return res.status(404).json({ success: false, message: "Supplier not found." });
+
+        const orders = await PurchaseOrder.find({ supplier: supplierId, status: "delivered" });
+        const totalOrders = orders.length;
+        
+        let onTimeDeliveries = 0;
+        for (const order of orders) {
+            if (!order.expectedDeliveryDate || order.updatedAt <= order.expectedDeliveryDate) {
+                onTimeDeliveries++;
+            }
+        }
+        
+        const lateDeliveries = totalOrders - onTimeDeliveries;
+        const onTimeRate = totalOrders > 0 ? (onTimeDeliveries / totalOrders) * 100 : 100;
+        
+        res.status(200).json({
+            success: true,
+            data: {
+                totalOrders,
+                onTimeDeliveries,
+                lateDeliveries,
+                onTimeRate: Math.round(onTimeRate),
+                reliabilityScore: supplier.reliabilityScore
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Server Error" });
     }

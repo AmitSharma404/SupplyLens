@@ -31,12 +31,26 @@ export const getDashboardStats = async (req, res) => {
             status: { $in: ["pending", "shipped"] }
         });
 
-        // 5. Success Rate Calculation (ratio of delivered purchase orders to total non-cancelled POs)
+        // 5. Products Needing Reorder (stock <= minimumStockLevel)
+        const productsNeedingReorder = await Product.countDocuments({
+            $expr: { $lte: ["$currentStock", "$minimumStockLevel"] }
+        });
+
+        // 6. Suppliers With Delays
+        // Based on active overdue purchase orders
+        const today = new Date();
+        const overdueOrders = await PurchaseOrder.find({
+            status: "shipped",
+            expectedDeliveryDate: { $lt: today, $ne: null }
+        }).distinct("supplier");
+        const suppliersWithDelays = overdueOrders.length;
+
+        // Success Rate Calculation (ratio of delivered purchase orders to total non-cancelled POs)
         const totalPos = await PurchaseOrder.countDocuments({ status: { $ne: "cancelled" } });
         const deliveredPos = await PurchaseOrder.countDocuments({ status: "delivered" });
         const successRate = totalPos > 0 
             ? `${((deliveredPos / totalPos) * 100).toFixed(1)}%` 
-            : "98.2%"; // Fallback/default placeholder if no POs exist
+            : "98.2%";
 
         // 6. Priority Alerts (Detailed low stock products, populated with supplier details)
         const priorityAlerts = await Product.find({
@@ -65,6 +79,8 @@ export const getDashboardStats = async (req, res) => {
                 totalInventoryValue: `$${totalInventoryValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 lowStockCount,
                 pendingReordersCount,
+                productsNeedingReorder,
+                suppliersWithDelays,
                 successRate
             },
             alerts: formattedAlerts

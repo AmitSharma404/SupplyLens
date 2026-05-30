@@ -13,7 +13,7 @@ const stockMovementSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["in", "out", "adjustment", "IN", "OUT", "ADJUSTMENT"],
+        enum: ["in", "out", "adjustment", "IN", "OUT", "ADJUSTMENT", "SOLD", "RETURNED", "DAMAGED", "TRANSFERRED"],
         required: true
     },
     quantity: {
@@ -74,6 +74,9 @@ stockMovementSchema.pre('save', function() {
         this.performedBy = this.user;
     }
 });
+
+stockMovementSchema.index({ productId: 1, createdAt: -1 });
+stockMovementSchema.index({ type: 1, createdAt: -1 });
 
 const StockMovement = mongoose.model("StockMovement", stockMovementSchema);
 
