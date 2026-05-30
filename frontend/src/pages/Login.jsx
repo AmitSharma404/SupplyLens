@@ -1,0 +1,73 @@
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginUser, clearAuthError } from '../redux/slices/authSlice';
+import { toast } from 'sonner';
+import AuthLayout from '../layouts/AuthLayout';
+import AuthBox from '../components/auth/AuthBox';
+import FormInput from '../components/auth/FormInput';
+import SubmitButton from '../components/auth/SubmitButton';
+
+const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
+  const [shake, setShake] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (error) dispatch(clearAuthError());
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await dispatch(loginUser(form)).unwrap();
+      setSuccess(true);
+      toast.success('Welcome back!');
+      setTimeout(() => navigate('/dashboard', { replace: true }), 800);
+    } catch (err) {
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
+      toast.error(err || 'Login failed');
+    }
+  };
+
+  return (
+    <AuthLayout>
+      <AuthBox shake={shake}>
+        <h2 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.6px', color: 'var(--text)', marginBottom: '4px' }}>
+          Welcome back
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '28px' }}>
+          Log in to your SupplyLens account
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <FormInput label="Email" type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@company.com" required />
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)' }}>Password</label>
+              <span style={{ fontSize: '13px', color: 'var(--text-tertiary)', cursor: 'pointer' }} className="hover:opacity-70 transition-opacity">
+                Forgot?
+              </span>
+            </div>
+            <FormInput type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" required error={error} />
+          </div>
+          <SubmitButton loading={loading} success={success}>Log in</SubmitButton>
+        </form>
+
+        <p className="text-center mt-6" style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+          Don't have an account?{' '}
+          <Link to="/signup" style={{ color: 'var(--accent)', fontWeight: 500 }} className="hover:opacity-80 transition-opacity">
+            Sign up
+          </Link>
+        </p>
+      </AuthBox>
+    </AuthLayout>
+  );
+};
+
+export default Login;

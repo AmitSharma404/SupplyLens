@@ -1,0 +1,170 @@
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Plus, Trash2, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, removeProduct } from '../redux/slices/productSlice';
+import StatusPill from '../components/app/StatusPill';
+
+const calculateStatus = (stock, min) => {
+  if (stock <= 0) return 'critical';
+  if (stock <= min) return 'reorder-soon';
+  return 'in-stock';
+};
+
+const stockBarColor = (ratio) => ratio > 0.5 ? 'var(--green)' : ratio > 0.25 ? 'var(--amber)' : 'var(--red)';
+
+const Inventory = () => {
+  const dispatch = useDispatch();
+  const { items: products, loading } = useSelector(state => state.products);
+  
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
+  const filtered = (products || []).filter(p => {
+    const status = calculateStatus(p.currentStock || 0, p.lowStockThreshold || 10);
+    const matchesSearch = p.name?.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter === 'all' || status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      dispatch(removeProduct(id));
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse" style={{ color: 'var(--app-text-muted)' }}>Loading inventory...</div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div className="p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px' }}>Inventory</h1>
+        <Link to="/dashboard/inventory/add">
+          <motion.button
+            className="btn-shimmer flex items-center gap-2 px-4 py-2.5 rounded-[10px] cursor-pointer border-0"
+            style={{ background: 'var(--accent)', color: '#000', fontSize: '13px', fontWeight: 500 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Plus size={14} /> Add Product
+          </motion.button>
+        </Link>
+      </div>
+
+      {/* Search + Filter */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="relative flex-1 max-w-[320px]">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--app-text-muted)' }} />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full py-2.5 pl-9 pr-4 rounded-[10px] outline-none transition-all duration-300"
+            style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', fontSize: '13px', color: 'var(--app-text)' }}
+            onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)'; }}
+            onBlur={e => { e.target.style.borderColor = 'var(--app-border)'; e.target.style.boxShadow = 'none'; }}
+          />
+        </div>
+        <div className="flex gap-1">
+          {['all', 'in-stock', 'reorder-soon', 'critical'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className="px-3 py-1.5 rounded-[100px] cursor-pointer border-0 transition-all duration-200"
+              style={{
+                fontSize: '12px',
+                fontWeight: 500,
+                background: filter === f ? 'var(--accent-glow)' : 'transparent',
+                color: filter === f ? 'var(--accent)' : 'var(--app-text-muted)',
+                border: filter === f ? '1px solid var(--accent)' : '1px solid var(--app-border)',
+              }}
+            >
+              {f === 'all' ? 'All' : f.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-[12px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
+        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--app-border)', background: 'var(--app-surface)' }}>
+              {['Product', 'SKU', 'Category', 'Stock', 'Status', ''].map(h => (
+                <th key={h} className="text-left py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <AnimatePresence>
+              {filtered.map((p, i) => {
+                const stock = p.currentStock || 0;
+                const max = 1000; // Mock max for visualization since schema doesn't have it
+                const ratio = Math.min(stock / max, 1);
+                const status = calculateStatus(stock, p.lowStockThreshold || 10);
+                return (
+                  <motion.tr
+                    key={p._id || p.id}
+                    className="group transition-colors duration-150"
+                    style={{ borderBottom: '1px solid var(--app-border)' }}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                    transition={{ duration: 0.3, delay: i * 0.03 }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--app-overlay)'; e.currentTarget.style.borderLeft = '2px solid var(--accent)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeft = '2px solid transparent'; }}
+                  >
+                    <td className="py-3 px-4" style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>{p.name}</td>
+                    <td className="py-3 px-4" style={{ fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--app-text-muted)' }}>{p.sku}</td>
+                    <td className="py-3 px-4" style={{ fontSize: '13px', color: 'var(--app-text-muted)' }}>{p.category}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)', fontFamily: 'var(--font-mono)' }}>{stock}</span>
+                        <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: 'var(--app-overlay)' }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: stockBarColor(ratio) }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${ratio * 100}%` }}
+                            transition={{ duration: 0.6, ease: 'easeOut', delay: i * 0.03 }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4"><StatusPill status={status} /></td>
+                    <td className="py-3 px-4 text-right">
+                      <button
+                        onClick={() => handleDelete(p._id || p.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer bg-transparent border-0 p-1"
+                        style={{ color: 'var(--app-text-muted)' }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
+                  </motion.tr>
+                );
+              })}
+            </AnimatePresence>
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+};
+
+export default Inventory;

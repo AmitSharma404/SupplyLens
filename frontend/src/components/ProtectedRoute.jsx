@@ -6,8 +6,8 @@ const ProtectedRoute = ({ children }) => {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f0f4f8] text-[#102a43] font-semibold">
-        Checking your session...
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+        <div className="w-6 h-6 border-2 border-transparent rounded-full animate-spin" style={{ borderTopColor: 'var(--accent)' }} />
       </div>
     );
   }
