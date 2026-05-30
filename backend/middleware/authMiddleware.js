@@ -24,6 +24,11 @@ export const protectedRoute = async (req, res, next) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
+        // Auto-upgrade legacy 'user' role to 'admin'
+        if (req.user.role === 'user') {
+            req.user.role = 'admin';
+        }
+
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Not authorized, token failed' });
