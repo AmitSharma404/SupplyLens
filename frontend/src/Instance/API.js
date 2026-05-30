@@ -12,10 +12,12 @@ const parseResponseBody = async (response) => {
 };
 
 const request = async (endpoint, options = {}) => {
+    const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}${endpoint}`, {
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
             ...(options.headers || {}),
         },
         ...options,
@@ -44,10 +46,14 @@ export const register = async (userData) => {
 
 export const login = async (credentials) => {
     try {
-        return await request('/auth/login', {
+        const data = await request('/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials),
         });
+        if (data && data.token) {
+            localStorage.setItem('token', data.token);
+        }
+        return data;
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }
@@ -55,9 +61,11 @@ export const login = async (credentials) => {
 
 export const logout = async () => {
     try {
-        return await request('/auth/logout', {
+        const data = await request('/auth/logout', {
             method: 'POST',
         });
+        localStorage.removeItem('token');
+        return data;
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }
