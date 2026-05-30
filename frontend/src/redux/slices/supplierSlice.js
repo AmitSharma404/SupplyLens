@@ -4,7 +4,7 @@ import { getSuppliers, createSupplier } from "../../Instance/API.js";
 export const fetchSuppliers = createAsyncThunk("suppliers/fetchAll", async (_, thunkAPI) => {
   try {
     const response = await getSuppliers();
-    return response.data || response;
+    return response.suppliers || response.data || response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message || "Failed to fetch suppliers");
   }
@@ -13,7 +13,7 @@ export const fetchSuppliers = createAsyncThunk("suppliers/fetchAll", async (_, t
 export const addSupplier = createAsyncThunk("suppliers/add", async (supplierData, thunkAPI) => {
   try {
     const response = await createSupplier(supplierData);
-    return response.data || response;
+    return response.supplier || response.data || response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message || "Failed to add supplier");
   }

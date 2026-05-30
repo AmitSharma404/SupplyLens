@@ -4,8 +4,8 @@ import { getProducts, createProduct, deleteProduct } from "../../Instance/API.js
 export const fetchProducts = createAsyncThunk("products/fetchAll", async (_, thunkAPI) => {
   try {
     const response = await getProducts();
-    // Assuming backend returns { success: true, count, data: [...] } or just [...]
-    return response.data || response;
+    // Assuming backend returns { success: true, count, products: [...] } or data: [...]
+    return response.products || response.data || response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message || "Failed to fetch products");
   }
@@ -14,7 +14,7 @@ export const fetchProducts = createAsyncThunk("products/fetchAll", async (_, thu
 export const addProduct = createAsyncThunk("products/add", async (productData, thunkAPI) => {
   try {
     const response = await createProduct(productData);
-    return response.data || response;
+    return response.product || response.data || response;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message || "Failed to add product");
   }

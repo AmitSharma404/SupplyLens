@@ -30,7 +30,7 @@ const Signup = () => {
       setSuccess(true);
       toast.success('Account created!');
       confetti({ particleCount: 60, spread: 55, origin: { y: 0.6 }, colors: ['#10b981', '#059669', '#34d399'] });
-      setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
+      setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err) {
       setShake(true);
       setTimeout(() => setShake(false), 600);
@@ -52,7 +52,7 @@ const Signup = () => {
               </svg>
             </div>
             <h2 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>Account created</h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Redirecting to dashboard…</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Redirecting to login…</p>
           </div>
         </AuthBox>
       </AuthLayout>
