@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Download, DownloadIcon } from "lucide-react";
 import { createOrder } from '../../Instance/API.js';
+import { getProducts } from '../../Instance/productInstance.js';
 
 const Card = ({ children, className = '' }) => (
   <div
@@ -287,17 +288,31 @@ const ReorderRow = ({
 
 
 export const DashboardHome = () => {
+  const [products, setProducts] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
   const [form, setForm] = useState({
-    orderNumber: '',
-    supplierId: '',
-    productId: '',
     quantityOrdered: '',
     unitPrice: '',
-    expectedDeliveryDate: '',
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getProducts();
+        setProducts(response || []);
+        if (response?.length) {
+          setSelectedProductId(response[0]._id);
+        }
+      } catch (fetchError) {
+        setError(fetchError.message || 'Failed to load products');
+      }
+    })();
+  }, []);
+
+  const selectedProduct = products.find((item) => item._id === selectedProductId);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -313,23 +328,32 @@ export const DashboardHome = () => {
     const quantity = Number(form.quantityOrdered);
     const price = Number(form.unitPrice);
 
+    if (!selectedProduct) {
+      setError('Please select a product');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const expectedDeliveryDate = new Date();
+    expectedDeliveryDate.setDate(expectedDeliveryDate.getDate() + 7);
+
     try {
       const response = await createOrder({
-        ...form,
+        orderNumber: `ORD-${selectedProduct.name.replace(/\s+/g, '-').toUpperCase()}-${Date.now()}`,
+        supplierId: selectedProduct.supplierId,
+        productId: selectedProduct._id,
         quantityOrdered: quantity,
         unitPrice: price,
         totalCost: quantity * price,
+        expectedDeliveryDate: expectedDeliveryDate.toISOString(),
       });
 
       setMessage(response?.msg || 'Order created successfully');
       setForm({
-        orderNumber: '',
-        supplierId: '',
-        productId: '',
         quantityOrdered: '',
         unitPrice: '',
-        expectedDeliveryDate: '',
       });
+      setSelectedProductId(products[0]?._id || '');
     } catch (submitError) {
       setError(submitError.message || 'Failed to create order');
     } finally {
@@ -351,20 +375,29 @@ export const DashboardHome = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-base font-bold text-gray-900">Create Order</h2>
-            <p className="text-[12px] text-gray-400 mt-1">Send a new purchase order to the backend.</p>
+            <p className="text-[12px] text-gray-400 mt-1">Pick a product and enter quantity plus unit price.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input name="orderNumber" value={form.orderNumber} onChange={handleChange} placeholder="Order Number" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
-          <input name="supplierId" value={form.supplierId} onChange={handleChange} placeholder="Supplier ID" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
-          <input name="productId" value={form.productId} onChange={handleChange} placeholder="Product ID" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
-          <input name="expectedDeliveryDate" type="date" value={form.expectedDeliveryDate} onChange={handleChange} className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
+          <select value={selectedProductId} onChange={(event) => setSelectedProductId(event.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary md:col-span-2" required>
+            {products.length ? null : <option value="">Loading products...</option>}
+            {products.map((product) => (
+              <option key={product._id} value={product._id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
           <input name="quantityOrdered" type="number" min="1" value={form.quantityOrdered} onChange={handleChange} placeholder="Quantity" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
           <input name="unitPrice" type="number" min="0" step="0.01" value={form.unitPrice} onChange={handleChange} placeholder="Unit Price" className="rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary" required />
 
           <div className="md:col-span-2 flex items-center justify-between gap-3 pt-1">
             <p className="text-sm text-gray-500">Total Cost: <span className="font-bold text-gray-900">{totalCost.toFixed(2)}</span></p>
+            {selectedProduct && (
+              <p className="text-xs text-gray-400 hidden sm:block">
+                Supplier ID: {selectedProduct.supplierId} | Product ID: {selectedProduct._id}
+              </p>
+            )}
             <button type="submit" disabled={isSubmitting} className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">
               {isSubmitting ? 'Creating...' : 'Create Order'}
             </button>
