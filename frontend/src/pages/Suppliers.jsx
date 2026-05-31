@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useAnimatedCounter } from '../hooks/useAnimatedCounter';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchSuppliers } from '../redux/slices/supplierSlice';
+import RoleGuard from '../components/RoleGuard';
+import { Link } from 'react-router-dom';
 
 const getSupplierColor = (score) => {
   if (score >= 90) return 'var(--green)';
@@ -54,12 +56,21 @@ const Suppliers = () => {
 
   return (
     <motion.div className="p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-      <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px', marginBottom: '32px' }}>Suppliers</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px' }}>Suppliers</h1>
+        <RoleGuard allowedRoles={['admin', 'manager']}>
+          <button className="btn-shimmer flex items-center gap-2 px-4 py-2.5 rounded-[10px] cursor-pointer border-0" style={{ background: 'var(--accent)', color: '#000', fontSize: '13px', fontWeight: 500 }}>
+            + Add Supplier
+          </button>
+        </RoleGuard>
+      </div>
 
       {suppliers?.length === 0 ? (
           <div className="py-16 text-center w-full" style={{ border: '1px dashed var(--app-border)', borderRadius: '12px' }}>
               <p style={{ color: 'var(--app-text-muted)', fontSize: '14px' }}>No suppliers found. Create your first supplier.</p>
-              <button className="mt-4 inline-block text-[13px] font-medium border-0 cursor-pointer" style={{ color: 'var(--accent)', background: 'transparent' }}>+ Add Supplier</button>
+              <RoleGuard allowedRoles={['admin', 'manager']}>
+                <button className="mt-4 inline-block text-[13px] font-medium border-0 cursor-pointer" style={{ color: 'var(--accent)', background: 'transparent' }}>+ Add Supplier</button>
+              </RoleGuard>
           </div>
       ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

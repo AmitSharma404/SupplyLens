@@ -9,7 +9,7 @@ import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
 const orderRouter = express.Router();
 
 orderRouter.route("/")
-    .post(protectedRoute, verifyRole(["manager", "admin"]), createPurchaseOrder)
+    .post(protectedRoute, verifyRole(["admin", "manager"]), createPurchaseOrder)
     .get(protectedRoute, getPurchaseOrders);
 
 orderRouter.route("/:id/status")

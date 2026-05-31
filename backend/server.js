@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
 import appRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import productRouter from './routes/productRoutes.js';
 import supplierRouter from './routes/supplierRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
@@ -27,6 +28,7 @@ connectDB();
 // routes
 
 app.use('/api/auth', appRouter);
+app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/suppliers', supplierRouter);
 app.use('/api/orders', orderRouter);

@@ -261,3 +261,23 @@ export const getForecast = async (productId) => {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
     }
 }
+
+// --- User Endpoints ---
+export const getUsers = async () => {
+    try {
+        return await request('/users');
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+export const updateUserRole = async (id, role) => {
+    try {
+        return await request(`/users/${id}/role`, {
+            method: 'PUT',
+            body: JSON.stringify({ role }),
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}

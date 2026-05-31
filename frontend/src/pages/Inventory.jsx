@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, removeProduct } from '../redux/slices/productSlice';
 import StatusPill from '../components/app/StatusPill';
 import { stockSell, stockAdjust } from '../Instance/API';
+import RoleGuard from '../components/RoleGuard';
 
 const calculateStatus = (stock, min, safety) => {
   if (stock === 0) return 'out-of-stock';
@@ -121,16 +122,18 @@ const Inventory = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px' }}>Inventory</h1>
-        <Link to="/dashboard/inventory/add">
-          <motion.button
-            className="btn-shimmer flex items-center gap-2 px-4 py-2.5 rounded-[10px] cursor-pointer border-0"
-            style={{ background: 'var(--accent)', color: '#000', fontSize: '13px', fontWeight: 500 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Plus size={14} /> Add Product
-          </motion.button>
-        </Link>
+        <RoleGuard allowedRoles={['admin', 'manager']}>
+          <Link to="/dashboard/inventory/add">
+            <motion.button
+              className="btn-shimmer flex items-center gap-2 px-4 py-2.5 rounded-[10px] cursor-pointer border-0"
+              style={{ background: 'var(--accent)', color: '#000', fontSize: '13px', fontWeight: 500 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Plus size={14} /> Add Product
+            </motion.button>
+          </Link>
+        </RoleGuard>
       </div>
 
       {/* Search + Filter */}
@@ -237,13 +240,15 @@ const Inventory = () => {
                             <button onClick={() => openAdjustModal(p)} className="px-2 py-1 rounded-[6px] text-[12px] font-medium border cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" style={{ borderColor: 'var(--app-border)', color: 'var(--app-text-muted)', background: 'transparent' }}>
                                 Adjust
                             </button>
-                            <button
-                                onClick={() => handleDelete(p._id || p.id)}
-                                className="cursor-pointer bg-transparent border-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                style={{ color: 'var(--red)' }}
-                            >
-                                <Trash2 size={14} />
-                            </button>
+                            <RoleGuard allowedRoles={['admin']}>
+                              <button
+                                  onClick={() => handleDelete(p._id || p.id)}
+                                  className="cursor-pointer bg-transparent border-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  style={{ color: 'var(--red)' }}
+                              >
+                                  <Trash2 size={14} />
+                              </button>
+                            </RoleGuard>
                         </div>
                     </td>
                   </motion.tr>

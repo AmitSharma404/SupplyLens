@@ -12,12 +12,12 @@ import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
 const supplierRouter = express.Router();
 
 supplierRouter.route("/")
-    .post(protectedRoute, createSupplier) // Normal users can create
+    .post(protectedRoute, verifyRole(["admin", "manager"]), createSupplier)
     .get(protectedRoute, getSuppliers);
 
 supplierRouter.route("/:id")
     .get(protectedRoute, getSupplierById)
-    .put(protectedRoute, verifyRole(["admin"]), updateSupplier)
+    .put(protectedRoute, verifyRole(["admin", "manager"]), updateSupplier)
     .delete(protectedRoute, verifyRole(["admin"]), deleteSupplier);
 
 supplierRouter.route("/:id/score-breakdown")

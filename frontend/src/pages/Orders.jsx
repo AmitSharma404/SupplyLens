@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StatusPill from '../components/app/StatusPill';
 import DrawerPanel from '../components/app/DrawerPanel';
-import { getOrders, updateOrderStatus } from '../Instance/API';
 import { Link } from 'react-router-dom';
+import RoleGuard from '../components/RoleGuard';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -63,6 +63,18 @@ const Orders = () => {
     <motion.div className="p-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
       <div className="flex items-center justify-between mb-6">
           <h1 style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px' }}>Orders</h1>
+          <RoleGuard allowedRoles={['admin', 'manager']}>
+            <Link to="/dashboard/orders/create">
+              <motion.button
+                className="btn-shimmer flex items-center gap-2 px-4 py-2.5 rounded-[10px] cursor-pointer border-0"
+                style={{ background: 'var(--accent)', color: '#000', fontSize: '13px', fontWeight: 500 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                + Create Order
+              </motion.button>
+            </Link>
+          </RoleGuard>
       </div>
 
       <div className="rounded-[12px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
@@ -82,7 +94,9 @@ const Orders = () => {
                 <tr>
                     <td colSpan="7" className="py-16 text-center">
                         <p style={{ color: 'var(--app-text-muted)', fontSize: '14px' }}>No orders yet. Create your first order.</p>
-                        <Link to="/dashboard/orders/create" className="mt-4 inline-block text-[13px] font-medium" style={{ color: 'var(--accent)' }}>+ Create Order</Link>
+                        <RoleGuard allowedRoles={['admin', 'manager']}>
+                          <Link to="/dashboard/orders/create" className="mt-4 inline-block text-[13px] font-medium" style={{ color: 'var(--accent)' }}>+ Create Order</Link>
+                        </RoleGuard>
                     </td>
                 </tr>
               ) : orders.map((o, i) => {
