@@ -1,54 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 @import 'tailwindcss';
 
-@theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
+/* ─── SupplyLens — Premium SaaS Design System ─── */
 
+:root {
+  /* Backgrounds */
+  --bg:             #f8f9fa;
+  --bg-secondary:   #f1f5f9;
+  --bg-tertiary:    #e2e8f0;
+  --bg-elevated:    #ffffff;
 
-  --color-status-healthy: hsl(var(--status-healthy));
-  --color-status-warning: hsl(var(--status-warning));
-  --color-status-critical: hsl(var(--status-critical));
-  
+  /* App (dashboard) backgrounds — matched to light theme */
+  --app-bg:          #f8f9fa;
+  --app-surface:     #ffffff;
+  --app-elevated:    #ffffff;
+  --app-overlay:     #f1f5f9;
+
+  /* Borders */
+  --border:         #e5e5e5;
+  --border-light:   #f0f0f0;
+  --border-hover:   #d4d4d4;
+  --border-active:  #a3a3a3;
+
+  /* App borders */
+  --app-border:       #e5e5e5;
+  --app-border-hover: #d4d4d4;
+
+  /* Text */
+  --text:           #171717;
+  --text-secondary: #525252;
+  --text-tertiary:  #a3a3a3;
+  --text-inverted:  #fafafa;
+
+  /* App text */
+  --app-text:       #111111;
+  --app-text-muted: #64748b;
+
+  /* Brand accent */
+  --accent:         #10b981;
+  --accent-hover:   #059669;
+  --accent-light:   #ecfdf5;
+  --accent-subtle:  #d1fae5;
+  --accent-text:    #065f46;
+
+  /* Semantic */
+  --green:          #10b981;
+  --amber:          #f59e0b;
+  --red:            #ef4444;
+  --blue:           #3b82f6;
+
+  /* Chart palette */
+  --chart-1: #10b981;
+  --chart-2: #3b82f6;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #ec4899;
+
+  /* Typography */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, monospace;
+
+  /* Spacing */
+  --section-gap: clamp(96px, 12vw, 160px);
+
+  /* Radius */
+  --radius-sm:    8px;
+  --radius-md:    12px;
+  --radius-lg:    16px;
+  --radius-xl:    20px;
+  --radius-2xl:   24px;
+  --radius-pill:  100px;
+
+  /* Layout */
+  --max-width:     1240px;
+  --sidebar-width: 240px;
+  --navbar-height: 56px;
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 95%;
-    /* #F3F4F6 page bg  */
-    --foreground: 220 9% 11%;
-    /* #111827 text      */
-    --primary: 161 80% 34%;
-    /* #1F7A4D brand     */
-    --status-healthy: 150 58% 41%;
-    /* #28A86A           */
-    --status-warning: 38 92% 50%;
-    /* #F59E0B           */
-    --status-critical: 0 79% 60%;
-    /* #EF4444           */
 
-    --color-background: hsl(var(--background));
-    --color-foreground: hsl(var(--foreground));
-    --color-primary: hsl(var(--primary));
-    --color-status-healthy: hsl(var(--status-healthy));
-    --color-status-warning: hsl(var(--status-warning));
-    --color-status-critical: hsl(var(--status-critical));
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+/* ─── Container ─── */
+
+.container-max {
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (min-width: 768px) {
+  .container-max {
+    padding-left: 48px;
+    padding-right: 48px;
   }
+}
 
+/* ─── Selection ─── */
 
+::selection {
+  background-color: var(--accent-subtle);
+  color: var(--accent-text);
+}
 
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
+/* ─── Focus ─── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─── Scrollbar ─── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+
+/* ─── Base ─── */
+
+a, button, input, select, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+
+/* ─── Reduced Motion ─── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
+}
 
-  body {
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--background);
-  }
-
+/* ─── Utilities ─── */
+.hero-gradient {
+  background: radial-gradient(circle at 50% -20%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
 }

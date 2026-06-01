@@ -3,8 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
-import authRouter from './Routes/auth.routes.js';
-import productRouter from './Routes/product.routes.js';
+import appRouter from './Routes/auth.routes.js';
 import cookieParser from 'cookie-parser';
 import supplierRoute from './Routes/supplier.route.js';
 import orderRouter from './Routes/order.routes.js';
@@ -16,16 +15,13 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(cors({origin:FRONTEND_URL,credentials:true}));
 
-import { connetDB } from './DB/connection.js';
-connetDB();
+import { connectDB } from './config/db.js';
+connectDB();
 
 //api endpoints
 // routes
 
-app.use('/api/auth', authRouter);
-app.use('/api/products', productRouter); // Assuming you have product routes defined in productRouter as well
-app.use('/api/suppliers', supplierRoute); // Assuming you have supplier routes defined in supplierRoute as well
-app.use('/api/orders', orderRouter);
+app.use('/api/auth', appRouter);
 
 app.get('/api/auth', (req, res) => {
     res.send('Hello World!');
