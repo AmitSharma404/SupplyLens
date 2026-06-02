@@ -10,7 +10,7 @@ import Footer from '../components/landing/Footer';
 
 const Landing = () => {
   return (
-    <div style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className="landing-page-wrapper" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <Navbar />
       <Hero />
       <div style={{ paddingTop: '40px', paddingBottom: '60px' }}>

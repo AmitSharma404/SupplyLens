@@ -39,7 +39,7 @@ const DashboardPreview = () => {
       {/* Dashboard content */}
       <div className="p-6" style={{ background: '#111' }}>
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {stats.map(s => (
             <div key={s.label} className="p-4 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
               <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>

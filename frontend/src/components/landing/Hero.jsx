@@ -21,7 +21,7 @@ const NodeDiagram = () => {
   const cx = 199, cy = 137, r = 45;
 
   return (
-    <svg width="420" height="320" viewBox="0 0 420 320" fill="none">
+    <svg width="100%" height="auto" viewBox="0 0 420 320" style={{ maxWidth: '420px' }} fill="none">
       {/* Connection lines */}
       {nodes.map((n, i) => (
         <motion.line
@@ -90,7 +90,7 @@ const Hero = () => {
 
             <motion.h1
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } }}
-              style={{ fontSize: 'clamp(40px, 5.5vw, 56px)', fontWeight: 500, letterSpacing: '-2px', lineHeight: 1.08 }}
+              style={{ fontSize: 'clamp(32px, 8vw, 56px)', fontWeight: 500, letterSpacing: '-2px', lineHeight: 1.08 }}
             >
               Full visibility.
               <br />

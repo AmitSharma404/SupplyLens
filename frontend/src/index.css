@@ -150,3 +150,15 @@ img, svg { display: block; max-width: 100%; }
 .hero-gradient {
   background: radial-gradient(circle at 50% -20%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
 }
+
+/* ─── Landing Page Large Screen Zoom ─── */
+@media (min-width: 1440px) {
+  .landing-page-wrapper {
+    zoom: 1.1;
+  }
+}
+@media (min-width: 1920px) {
+  .landing-page-wrapper {
+    zoom: 1.25;
+  }
+}
