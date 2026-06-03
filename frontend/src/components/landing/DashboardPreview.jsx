@@ -31,7 +31,7 @@ const DashboardPreview = () => {
           <span className="w-[10px] h-[10px] rounded-full" style={{ background: '#febc2e' }} />
           <span className="w-[10px] h-[10px] rounded-full" style={{ background: '#28c840' }} />
         </div>
-        <div className="ml-3" style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>
+        <div className="ml-3" style={{ fontSize: '12px', color: '#888', fontFamily: 'var(--font-mono)' }}>
           dashboard.jsx
         </div>
       </div>
@@ -42,10 +42,10 @@ const DashboardPreview = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {stats.map(s => (
             <div key={s.label} className="p-4 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-              <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>
                 {s.label}
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.5px', color: s.color || '#f5f5f5' }}>
+              <p style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '-0.5px', color: s.color || '#f5f5f5' }}>
                 {s.value}
               </p>
             </div>
@@ -53,7 +53,7 @@ const DashboardPreview = () => {
         </div>
 
         {/* Chart label */}
-        <p style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
+        <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
           Stock Trend — Last 30 Days
         </p>
 
@@ -74,7 +74,7 @@ const DashboardPreview = () => {
 
         {/* Live Feed */}
         <div style={{ borderTop: '1px solid #2a2a2a', paddingTop: '16px' }}>
-          <p style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '12px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '12px' }}>
             LIVE FEED
           </p>
           <motion.div
@@ -98,11 +98,11 @@ const DashboardPreview = () => {
               >
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: item.color }} />
-                  <span style={{ fontSize: '11px', color: '#e5e5e5', fontFamily: 'var(--font-mono)' }}>{item.name}</span>
+                  <span style={{ fontSize: '12px', color: '#e5e5e5', fontFamily: 'var(--font-mono)' }}>{item.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>{item.qty}</span>
-                  <span style={{ fontSize: '11px', color: item.color, fontFamily: 'var(--font-mono)' }}>{item.status}</span>
+                  <span style={{ fontSize: '12px', color: '#888', fontFamily: 'var(--font-mono)' }}>{item.qty}</span>
+                  <span style={{ fontSize: '12px', color: item.color, fontFamily: 'var(--font-mono)' }}>{item.status}</span>
                 </div>
               </motion.div>
             ))}

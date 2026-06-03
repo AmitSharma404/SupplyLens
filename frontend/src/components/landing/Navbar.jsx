@@ -21,9 +21,9 @@ const Navbar = () => {
     >
       <div
         className="flex items-center justify-between mx-auto px-6 md:px-12"
-        style={{ maxWidth: '1200px', height: '56px' }}
+        style={{ maxWidth: '1200px', height: '64px' }}
       >
-        <Link to="/" style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', letterSpacing: '-0.3px' }}>
+        <Link to="/" style={{ fontSize: '17px', fontWeight: 600, color: '#0f172a', letterSpacing: '-0.3px' }}>
           SupplyLens
         </Link>
 
@@ -32,7 +32,7 @@ const Navbar = () => {
             <a
               key={link}
               href={`#${link.toLowerCase().replace(/\s/g, '-')}`}
-              style={{ fontSize: '13px', color: '#64748b', fontWeight: 450 }}
+              style={{ fontSize: '15px', color: '#64748b', fontWeight: 450 }}
               className="hover:text-[#0f172a] transition-colors"
             >
               {link}
@@ -40,14 +40,14 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link to="/login" style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+        <div className="flex items-center gap-5">
+          <Link to="/login" style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a' }}>
             Log in
           </Link>
           <Link to="/signup">
             <button
-              className="px-4 py-2 rounded-[10px] cursor-pointer border-0"
-              style={{ background: '#0f172a', color: '#fff', fontSize: '13px', fontWeight: 500 }}
+              className="px-5 py-2.5 rounded-[12px] cursor-pointer border-0"
+              style={{ background: '#0f172a', color: '#fff', fontSize: '15px', fontWeight: 500 }}
             >
               Get started free
             </button>
