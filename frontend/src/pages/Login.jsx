@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUser, clearAuthError } from '../redux/slices/authSlice';
+import { loginUser, googleLoginUser, clearAuthError } from '../redux/slices/authSlice';
+import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import AuthLayout from '../layouts/AuthLayout';
 import AuthBox from '../components/auth/AuthBox';
@@ -35,6 +36,23 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await dispatch(googleLoginUser(credentialResponse.credential)).unwrap();
+      setSuccess(true);
+      toast.success('Google login successful!');
+      setTimeout(() => navigate('/dashboard', { replace: true }), 800);
+    } catch (err) {
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
+      toast.error(err || 'Google Login failed');
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google Login failed');
+  };
+
   return (
     <AuthLayout>
       <AuthBox shake={shake}>
@@ -58,6 +76,20 @@ const Login = () => {
           </div>
           <SubmitButton loading={loading} success={success}>Log in</SubmitButton>
         </form>
+
+        <div className="flex items-center my-6">
+          <div className="flex-1 border-t" style={{ borderColor: 'var(--border)' }}></div>
+          <span className="px-3" style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>or continue with</span>
+          <div className="flex-1 border-t" style={{ borderColor: 'var(--border)' }}></div>
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap
+          />
+        </div>
 
         <p className="text-center mt-6" style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
