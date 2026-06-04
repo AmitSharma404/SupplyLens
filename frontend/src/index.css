@@ -131,6 +131,14 @@ body {
 ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
 
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ─── Base ─── */
 
 a, button, input, select, textarea { font-family: inherit; }

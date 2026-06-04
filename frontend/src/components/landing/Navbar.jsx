@@ -40,19 +40,34 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-5">
-          <Link to="/login" style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a' }}>
+        <div className="flex items-center gap-3 md:gap-5">
+          <Link to="/login" style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
             Log in
           </Link>
           <Link to="/signup">
             <button
-              className="px-5 py-2.5 rounded-[12px] cursor-pointer border-0"
-              style={{ background: '#0f172a', color: '#fff', fontSize: '15px', fontWeight: 500 }}
+              className="px-3 md:px-5 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] cursor-pointer border-0 whitespace-nowrap"
+              style={{ background: '#0f172a', color: '#fff', fontSize: '13px', fontWeight: 500 }}
             >
-              Get started free
+              Get started
             </button>
           </Link>
         </div>
+      </div>
+      
+      {/* Mobile minimal navigation */}
+      <div className="md:hidden flex items-center justify-center gap-6 px-4 py-2 overflow-x-auto hide-scrollbar"
+        style={{ borderTop: scrolled ? '1px solid #e2e8f0' : '1px solid transparent' }}>
+        {['Features', 'How it works', 'Compare', 'Docs'].map(link => (
+          <a
+            key={link}
+            href={`#${link.toLowerCase().replace(/\s/g, '-')}`}
+            style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap' }}
+            className="hover:text-[#0f172a] transition-colors"
+          >
+            {link}
+          </a>
+        ))}
       </div>
     </nav>
   );

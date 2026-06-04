@@ -77,8 +77,8 @@ const Orders = () => {
           </RoleGuard>
       </div>
 
-      <div className="rounded-[12px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+      <div className="rounded-[12px] overflow-x-auto" style={{ border: '1px solid var(--app-border)' }}>
+        <table className="w-full min-w-[700px]" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--app-border)', background: 'var(--app-surface)' }}>
               {['Order ID', 'Supplier', 'Items', 'Total', 'Expected Date', 'Status', 'Actions'].map(h => (

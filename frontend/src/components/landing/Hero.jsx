@@ -85,7 +85,7 @@ const Hero = () => {
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ background: '#22c55e', animation: 'pulse-dot 2s ease-in-out infinite' }}
               />
-              <span style={{ fontSize: '14px', fontWeight: 500, color: '#166534' }}>Now in public beta</span>
+              {/* <span style={{ fontSize: '14px', fontWeight: 500, color: '#166534' }}>Now in public beta</span> */}
             </motion.div>
 
             <motion.h1

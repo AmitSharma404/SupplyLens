@@ -114,8 +114,8 @@ export const DashboardSettings = () => {
               <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>User Management</h3><p style={{ fontSize: '12px', color: 'var(--app-text-muted)' }}>Manage user roles and access</p></div>
             </div>
             
-            <div className="rounded-[8px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-              <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+            <div className="rounded-[12px] overflow-x-auto mt-6" style={{ border: '1px solid var(--app-border)' }}>
+              <table className="w-full text-left min-w-[600px]" style={{ borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: 'var(--app-overlay)', borderBottom: '1px solid var(--app-border)' }}>
                     <th className="py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>Name</th>

@@ -172,8 +172,8 @@ const Inventory = () => {
       </div>
 
       {/* Table */}
-      <div className="rounded-[12px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+      <div className="rounded-[12px] overflow-x-auto" style={{ border: '1px solid var(--app-border)' }}>
+        <table className="w-full min-w-[800px]" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--app-border)', background: 'var(--app-surface)' }}>
               {['Product', 'SKU', 'Stock', 'Status', 'Actions'].map(h => (

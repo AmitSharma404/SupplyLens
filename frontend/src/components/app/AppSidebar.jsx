@@ -35,7 +35,7 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen flex flex-col z-40"
+      className="hidden md:flex fixed left-0 top-0 h-screen flex-col z-40"
       style={{ width: 'var(--sidebar-width)', background: 'var(--app-surface)', borderRight: '1px solid var(--app-border)' }}
     >
       <div className="px-6 py-5">
