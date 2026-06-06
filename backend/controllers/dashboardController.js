@@ -19,8 +19,9 @@ export const getDashboardStats = async (req, res) => {
             deliveredPos,
             priorityAlerts
         ] = await Promise.all([
-            Product.countDocuments({}),
+            Product.countDocuments({ organization: req.user.organization }),
             Product.aggregate([
+                { $match: { organization: req.user.organization } },
                 {
                     $group: {
                         _id: null,
@@ -29,21 +30,26 @@ export const getDashboardStats = async (req, res) => {
                 }
             ]),
             Product.countDocuments({
+                organization: req.user.organization,
                 $expr: { $lte: ["$stockQuantity", "$lowStockThreshold"] }
             }),
             PurchaseOrder.countDocuments({
+                organization: req.user.organization,
                 status: { $in: ["pending", "shipped"] }
             }),
             Product.countDocuments({
+                organization: req.user.organization,
                 $expr: { $lte: ["$currentStock", "$minimumStockLevel"] }
             }),
             PurchaseOrder.find({
+                organization: req.user.organization,
                 status: "shipped",
                 expectedDeliveryDate: { $lt: new Date(), $ne: null }
             }).distinct("supplier"),
-            PurchaseOrder.countDocuments({ status: { $ne: "cancelled" } }),
-            PurchaseOrder.countDocuments({ status: "delivered" }),
+            PurchaseOrder.countDocuments({ status: { $ne: "cancelled" }, organization: req.user.organization }),
+            PurchaseOrder.countDocuments({ status: "delivered", organization: req.user.organization }),
             Product.find({
+                organization: req.user.organization,
                 $expr: { $lte: ["$stockQuantity", "$lowStockThreshold"] }
             })
             .populate("supplier", "name email contactPerson phone")

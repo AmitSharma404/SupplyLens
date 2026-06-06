@@ -25,7 +25,7 @@ export const stockIn = async (req, res) => {
             });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -44,7 +44,8 @@ export const stockIn = async (req, res) => {
             previousStock,
             newStock,
             reason,
-            performedBy: req.user._id
+            performedBy: req.user._id,
+            organization: req.user.organization
         });
 
         // Update product stock levels
@@ -88,7 +89,7 @@ export const stockOut = async (req, res) => {
             });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -114,7 +115,8 @@ export const stockOut = async (req, res) => {
             previousStock,
             newStock,
             reason,
-            performedBy: req.user._id
+            performedBy: req.user._id,
+            organization: req.user.organization
         });
 
         // Update product stock levels
@@ -143,7 +145,7 @@ export const getStockHistory = async (req, res) => {
     try {
         const { productId } = req.params;
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -151,7 +153,7 @@ export const getStockHistory = async (req, res) => {
             });
         }
 
-        const movements = await StockMovement.find({ productId })
+        const movements = await StockMovement.find({ productId, organization: req.user.organization })
             .populate("performedBy", "name email")
             .sort({ createdAt: -1 });
 
@@ -183,7 +185,7 @@ export const stockSell = async (req, res) => {
             return res.status(400).json({ success: false, message: "Quantity must be a positive number." });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) return res.status(404).json({ success: false, message: "Product not found." });
 
         if (product.currentStock < parsedQuantity) {
@@ -202,7 +204,8 @@ export const stockSell = async (req, res) => {
             newStock,
             reason: customerRef ? `Sale: ${customerRef}` : "Sale",
             performedBy: req.user._id,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         product.currentStock = newStock;
@@ -215,14 +218,16 @@ export const stockSell = async (req, res) => {
                 type: "LOW_STOCK",
                 message: `Low Stock Alert: ${product.name} has reached critical level (${newStock} units left).`,
                 priority: "HIGH",
-                productId: product._id
+                productId: product._id,
+                organization: req.user.organization
             });
         } else if (newStock <= product.reorderPoint) {
             await Notification.create({
                 type: "REORDER_RECOMMENDED",
                 message: `Reorder Recommended: ${product.name} is below reorder point (${newStock} units left).`,
                 priority: "MEDIUM",
-                productId: product._id
+                productId: product._id,
+                organization: req.user.organization
             });
         }
 
@@ -254,7 +259,7 @@ export const stockAdjust = async (req, res) => {
             return res.status(400).json({ success: false, message: "Quantity must be a positive number." });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) return res.status(404).json({ success: false, message: "Product not found." });
 
         const previousStock = product.currentStock;
@@ -273,7 +278,8 @@ export const stockAdjust = async (req, res) => {
             newStock,
             reason: notes ? `${reason} - ${notes}` : reason,
             performedBy: req.user._id,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         product.currentStock = newStock;

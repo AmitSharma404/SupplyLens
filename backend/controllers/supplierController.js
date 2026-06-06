@@ -12,7 +12,7 @@ export const createSupplier = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide all required fields." });
         }
 
-        const supplierExists = await Supplier.findOne({ email });
+        const supplierExists = await Supplier.findOne({ email, organization: req.user.organization });
         if (supplierExists) {
             return res.status(400).json({ success: false, message: "Supplier with this email already exists." });
         }
@@ -23,7 +23,8 @@ export const createSupplier = async (req, res) => {
             email,
             phone,
             address,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         res.status(201).json({ success: true, supplier });
@@ -41,8 +42,8 @@ export const getSuppliers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
 
-        const total = await Supplier.countDocuments({});
-        const suppliers = await Supplier.find({})
+        const total = await Supplier.countDocuments({ organization: req.user.organization });
+        const suppliers = await Supplier.find({ organization: req.user.organization })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -67,7 +68,7 @@ export const getSuppliers = async (req, res) => {
 // @access  Private
 export const getSupplierById = async (req, res) => {
     try {
-        const supplier = await Supplier.findById(req.params.id);
+        const supplier = await Supplier.findOne({ _id: req.params.id, organization: req.user.organization });
 
         if (!supplier) {
             return res.status(404).json({ success: false, message: "Supplier not found" });
@@ -84,14 +85,14 @@ export const getSupplierById = async (req, res) => {
 // @access  Private/Admin
 export const updateSupplier = async (req, res) => {
     try {
-        let supplier = await Supplier.findById(req.params.id);
+        let supplier = await Supplier.findOne({ _id: req.params.id, organization: req.user.organization });
 
         if (!supplier) {
             return res.status(404).json({ success: false, message: "Supplier not found" });
         }
 
-        supplier = await Supplier.findByIdAndUpdate(
-            req.params.id,
+        supplier = await Supplier.findOneAndUpdate(
+            { _id: req.params.id, organization: req.user.organization },
             req.body,
             { new: true, runValidators: true }
         );
@@ -107,7 +108,7 @@ export const updateSupplier = async (req, res) => {
 // @access  Private/Admin
 export const deleteSupplier = async (req, res) => {
     try {
-        const supplier = await Supplier.findById(req.params.id);
+        const supplier = await Supplier.findOne({ _id: req.params.id, organization: req.user.organization });
 
         if (!supplier) {
             return res.status(404).json({ success: false, message: "Supplier not found" });
@@ -127,10 +128,10 @@ export const deleteSupplier = async (req, res) => {
 export const getSupplierScoreBreakdown = async (req, res) => {
     try {
         const supplierId = req.params.id;
-        const supplier = await Supplier.findById(supplierId);
+        const supplier = await Supplier.findOne({ _id: supplierId, organization: req.user.organization });
         if (!supplier) return res.status(404).json({ success: false, message: "Supplier not found." });
 
-        const orders = await PurchaseOrder.find({ supplier: supplierId, status: "delivered" });
+        const orders = await PurchaseOrder.find({ supplier: supplierId, status: "delivered", organization: req.user.organization });
         const totalOrders = orders.length;
         
         let onTimeDeliveries = 0;

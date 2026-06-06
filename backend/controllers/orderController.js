@@ -16,7 +16,7 @@ export const createPurchaseOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide supplier and at least one item." });
         }
 
-        const supplierExists = await Supplier.findById(supplier);
+        const supplierExists = await Supplier.findOne({ _id: supplier, organization: req.user.organization });
         if (!supplierExists) {
             return res.status(404).json({ success: false, message: "Supplier not found." });
         }
@@ -32,7 +32,7 @@ export const createPurchaseOrder = async (req, res) => {
             if (isNaN(qty) || qty <= 0 || isNaN(price) || price < 0) {
                 return res.status(400).json({ success: false, message: "Quantity must be a valid number greater than 0, and unit price must be a valid non-negative number." });
             }
-            const product = await Product.findById(item.product);
+            const product = await Product.findOne({ _id: item.product, organization: req.user.organization });
             if (!product) {
                 return res.status(404).json({ success: false, message: `Product with ID ${item.product} not found.` });
             }
@@ -44,7 +44,8 @@ export const createPurchaseOrder = async (req, res) => {
             items,
             totalAmount,
             expectedDeliveryDate,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         res.status(201).json({ success: true, purchaseOrder });
@@ -62,8 +63,8 @@ export const getPurchaseOrders = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
 
-        const total = await PurchaseOrder.countDocuments({});
-        const purchaseOrders = await PurchaseOrder.find({})
+        const total = await PurchaseOrder.countDocuments({ organization: req.user.organization });
+        const purchaseOrders = await PurchaseOrder.find({ organization: req.user.organization })
             .populate("supplier", "name contactPerson email phone")
             .populate("items.product", "name sku category price")
             .populate("user", "name email")
@@ -98,7 +99,7 @@ export const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please provide a valid status: pending, shipped, delivered, cancelled." });
         }
 
-        const purchaseOrder = await PurchaseOrder.findById(req.params.id);
+        const purchaseOrder = await PurchaseOrder.findOne({ _id: req.params.id, organization: req.user.organization });
         if (!purchaseOrder) {
             return res.status(404).json({ success: false, message: "Purchase order not found." });
         }
@@ -116,7 +117,7 @@ export const updateOrderStatus = async (req, res) => {
         if (status === "delivered" && prevStatus !== "delivered") {
             // Process and reconcile stock for all items
             for (const item of purchaseOrder.items) {
-                const product = await Product.findById(item.product);
+                const product = await Product.findOne({ _id: item.product, organization: req.user.organization });
                 if (product) {
                     const previousStock = product.currentStock;
                     const parsedQuantity = Number(item.quantity);
@@ -137,7 +138,8 @@ export const updateOrderStatus = async (req, res) => {
                         newStock,
                         reason: `Order #${purchaseOrder._id} delivered`,
                         performedBy: req.user._id,
-                        user: req.user._id
+                        user: req.user._id,
+                        organization: req.user.organization
                     });
 
                     // Recalculate reorderPoint
@@ -145,7 +147,7 @@ export const updateOrderStatus = async (req, res) => {
 
                     // Mark REORDER_RECOMMENDED alerts as read for this product
                     await Notification.updateMany(
-                        { productId: product._id, type: "REORDER_RECOMMENDED", read: false },
+                        { productId: product._id, type: "REORDER_RECOMMENDED", read: false, organization: req.user.organization },
                         { $set: { read: true } }
                     );
                 }

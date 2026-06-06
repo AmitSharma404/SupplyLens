@@ -8,7 +8,7 @@ export const getProductForecast = async (req, res) => {
     try {
         const productId = req.params.productId;
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
@@ -19,6 +19,7 @@ export const getProductForecast = async (req, res) => {
 
         const movements = await StockMovement.find({
             productId: product._id,
+            organization: req.user.organization,
             type: "SOLD",
             createdAt: { $gte: ninetyDaysAgo }
         }).sort({ createdAt: 1 });

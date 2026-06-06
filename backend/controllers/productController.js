@@ -54,12 +54,12 @@ export const createProduct = async (req, res) => {
             return res.status(400).json({ success: false, message: "Low stock threshold must be a valid non-negative number." });
         }
 
-        const productExists = await Product.findOne({ sku });
+        const productExists = await Product.findOne({ sku, organization: req.user.organization });
         if (productExists) {
             return res.status(400).json({ success: false, message: "Product with this SKU already exists." });
         }
 
-        const supplierExists = await Supplier.findById(supplier);
+        const supplierExists = await Supplier.findOne({ _id: supplier, organization: req.user.organization });
         if (!supplierExists) {
             return res.status(404).json({ success: false, message: "Supplier not found." });
         }
@@ -73,7 +73,8 @@ export const createProduct = async (req, res) => {
             stockQuantity: numericStock,
             lowStockThreshold: numericThreshold,
             supplier,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         product = await product.populate("supplier", "name email contactPerson phone");
@@ -96,8 +97,8 @@ export const getProducts = async (req, res) => {
         const sortBy = req.query.sortBy || "createdAt";
         const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
 
-        const total = await Product.countDocuments({});
-        const products = await Product.find({})
+        const total = await Product.countDocuments({ organization: req.user.organization });
+        const products = await Product.find({ organization: req.user.organization })
             .populate("supplier", "name email contactPerson phone")
             .sort({ [sortBy]: sortOrder })
             .skip(skip)
@@ -123,7 +124,7 @@ export const getProducts = async (req, res) => {
 // @access  Private
 export const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id).populate("supplier", "name email contactPerson phone");
+        const product = await Product.findOne({ _id: req.params.id, organization: req.user.organization }).populate("supplier", "name email contactPerson phone");
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
@@ -165,14 +166,14 @@ export const updateProduct = async (req, res) => {
             req.body.supplierId = req.body.supplier;
         }
 
-        let product = await Product.findById(req.params.id);
+        let product = await Product.findOne({ _id: req.params.id, organization: req.user.organization });
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
         if (req.body.supplier !== undefined) {
-            const supplierExists = await Supplier.findById(req.body.supplier);
+            const supplierExists = await Supplier.findOne({ _id: req.body.supplier, organization: req.user.organization });
             if (!supplierExists) {
                 return res.status(404).json({ success: false, message: "Supplier not found." });
             }
@@ -202,8 +203,8 @@ export const updateProduct = async (req, res) => {
             req.body.lowStockThreshold = lowStockThreshold;
         }
 
-        product = await Product.findByIdAndUpdate(
-            req.params.id,
+        product = await Product.findOneAndUpdate(
+            { _id: req.params.id, organization: req.user.organization },
             req.body,
             { new: true, runValidators: true }
         ).populate("supplier", "name email contactPerson phone");
@@ -219,7 +220,7 @@ export const updateProduct = async (req, res) => {
 // @access  Private/Admin
 export const deleteProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ _id: req.params.id, organization: req.user.organization });
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found" });
@@ -250,7 +251,7 @@ export const createStockMovement = async (req, res) => {
             return res.status(400).json({ success: false, message: "Quantity must be a valid non-negative number." });
         }
 
-        const product = await Product.findById(productId);
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization });
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
@@ -276,7 +277,8 @@ export const createStockMovement = async (req, res) => {
             type,
             quantity: parsedQuantity,
             reason,
-            user: req.user._id
+            user: req.user._id,
+            organization: req.user.organization
         });
 
         // Update product stock quantity
@@ -299,8 +301,8 @@ export const getProductMovements = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
 
-        const total = await StockMovement.countDocuments({ product: productId });
-        const movements = await StockMovement.find({ product: productId })
+        const total = await StockMovement.countDocuments({ product: productId, organization: req.user.organization });
+        const movements = await StockMovement.find({ product: productId, organization: req.user.organization })
             .populate("user", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -327,7 +329,7 @@ export const getProductMovements = async (req, res) => {
 export const getReorderPoint = async (req, res) => {
     try {
         const productId = req.params.id;
-        const product = await Product.findById(productId).populate('supplier');
+        const product = await Product.findOne({ _id: productId, organization: req.user.organization }).populate('supplier');
         if (!product) return res.status(404).json({ success: false, message: "Product not found" });
 
         const reorderPoint = await calculateReorderPoint(productId);
@@ -337,6 +339,7 @@ export const getReorderPoint = async (req, res) => {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         const movements = await StockMovement.find({
             productId: product._id,
+            organization: req.user.organization,
             type: "SOLD",
             createdAt: { $gte: thirtyDaysAgo }
         });
