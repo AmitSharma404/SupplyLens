@@ -38,8 +38,10 @@ export const protect = async (req, res, next) => {
 };
 
 export const authorize = (...roles) => {
+    // Flatten roles in case an array was passed (e.g. authorize(['admin', 'manager']))
+    const allowedRoles = roles.flat();
     return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
         next();

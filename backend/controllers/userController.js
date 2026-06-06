@@ -2,7 +2,8 @@ import User from '../models/User.js';
 
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const org = req.user.organization || 'Legacy Workspace';
+        const users = await User.find({ organization: org }).select('-password');
         res.json(users);
     } catch (error) {
         console.error("Error in getAllUsers:", error);

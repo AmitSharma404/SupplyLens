@@ -1,8 +1,16 @@
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useAuth } from "../hooks/useAuth";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user, isAuthenticated, checkingAuth } = useSelector((state) => state.auth);
+  const { role, isAuthenticated, checkingAuth } = useAuth();
+
+  useEffect(() => {
+    if (allowedRoles && role && !allowedRoles.includes(role)) {
+      toast.error("You do not have permission to access this page");
+    }
+  }, [role, allowedRoles]);
 
   if (checkingAuth) {
     return (
@@ -16,7 +24,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
     return <Navigate to="/dashboard" replace />;
   }
 

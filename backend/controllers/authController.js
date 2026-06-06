@@ -6,7 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, organization } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Name, email and password are required" });
@@ -21,12 +21,15 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const domain = normalizedEmail.split('@')[1];
+    const defaultOrg = domain === 'gmail.com' ? 'Personal Workspace' : domain;
 
     const newUser = new User({
       name,
       email: normalizedEmail,
       password: hashedPassword,
       role: role || 'staff',
+      organization: organization || defaultOrg
     });
 
     await newUser.save();
@@ -134,12 +137,15 @@ export const googleAuth = async (req, res) => {
     const payload = ticket.getPayload();
     const { email, name, sub: googleId } = payload;
     const normalizedEmail = email.toLowerCase().trim();
+    const domain = normalizedEmail.split('@')[1];
+    const org = domain === 'gmail.com' ? 'Personal Workspace' : domain;
 
     let user = await User.findOne({ email: normalizedEmail });
 
     if (user) {
       if (!user.googleId) {
         user.googleId = googleId;
+        if (!user.organization) user.organization = org;
         await user.save();
       }
     } else {
@@ -147,6 +153,7 @@ export const googleAuth = async (req, res) => {
         name,
         email: normalizedEmail,
         googleId,
+        organization: org
       });
       await user.save();
     }

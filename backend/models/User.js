@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['admin', 'manager', 'staff'],
         default: 'staff'
+    },
+    organization: {
+        type: String,
+        default: 'Legacy Workspace'
     }
 }, { timestamps: true });
 

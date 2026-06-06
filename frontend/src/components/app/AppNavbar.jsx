@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { Search, Bell, ChevronDown, LogOut, Settings, LayoutDashboard, Archive, Users, ShoppingCart, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { logoutUser } from '../../redux/slices/authSlice';
+import { getAlerts } from '../../Instance/API';
 
 const pageTitles = {
   '/dashboard': 'Dashboard',
@@ -17,19 +19,20 @@ const pageTitles = {
 };
 
 const mobileNavItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', end: true },
-  { icon: Archive, label: 'Inventory', path: '/dashboard/inventory' },
-  { icon: Users, label: 'Suppliers', path: '/dashboard/suppliers' },
-  { icon: ShoppingCart, label: 'Orders', path: '/dashboard/orders' },
-  { icon: TrendingUp, label: 'Forecast', path: '/dashboard/forecast' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', end: true, allowedRoles: ['admin', 'manager', 'staff'] },
+  { icon: Archive, label: 'Inventory', path: '/dashboard/inventory', allowedRoles: ['admin', 'manager', 'staff'] },
+  { icon: ShoppingCart, label: 'Orders', path: '/dashboard/orders', allowedRoles: ['admin', 'manager', 'staff'] },
+  { icon: Users, label: 'Suppliers', path: '/dashboard/suppliers', allowedRoles: ['admin', 'manager'] },
+  { icon: TrendingUp, label: 'Forecast', path: '/dashboard/forecast', allowedRoles: ['admin', 'manager'] },
 ];
 
 const AppNavbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, role } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [alertCount, setAlertCount] = useState(0);
   const dropdownRef = useRef(null);
   const pageTitle = pageTitles[location.pathname] || 'Dashboard';
 
@@ -38,6 +41,21 @@ const AppNavbar = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    const fetchAlertCount = async () => {
+      try {
+        const res = await getAlerts(false); // unread only
+        setAlertCount(res.data?.length || 0);
+      } catch (err) {
+        console.error("Failed to fetch alert count");
+      }
+    };
+    if (user) fetchAlertCount();
+    // Refresh alert count every minute
+    const interval = setInterval(fetchAlertCount, 60000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = async () => {
     setShowDropdown(false);
@@ -56,7 +74,12 @@ const AppNavbar = () => {
             className="relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer bg-transparent transition-colors"
             style={{ border: '1px solid var(--app-border)', color: 'var(--app-text-muted)' }}>
             <Bell size={14} />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+            {alertCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center rounded-full text-white" 
+                style={{ background: 'var(--red, #ef4444)', minWidth: '16px', height: '16px', fontSize: '10px', fontWeight: 600, padding: '0 4px' }}>
+                {alertCount > 99 ? '99+' : alertCount}
+              </span>
+            )}
           </button>
 
           <div className="relative" ref={dropdownRef}>
@@ -72,14 +95,18 @@ const AppNavbar = () => {
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-44 py-1 z-50 rounded-lg shadow-sm"
                 style={{ background: 'var(--app-elevated)', border: '1px solid var(--app-border)' }}>
-                <button onClick={() => { setShowDropdown(false); navigate('/dashboard/settings'); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 cursor-pointer bg-transparent border-0 text-left transition-colors"
-                  style={{ fontSize: '13px', color: 'var(--app-text-muted)' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--app-overlay)'; e.currentTarget.style.color = 'var(--app-text)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--app-text-muted)'; }}>
-                  <Settings size={14} /> Settings
-                </button>
-                <div style={{ borderTop: '1px solid var(--app-border)', margin: '4px 0' }} />
+                {role === 'admin' && (
+                  <>
+                    <button onClick={() => { setShowDropdown(false); navigate('/dashboard/settings'); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 cursor-pointer bg-transparent border-0 text-left transition-colors"
+                      style={{ fontSize: '13px', color: 'var(--app-text-muted)' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--app-overlay)'; e.currentTarget.style.color = 'var(--app-text)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--app-text-muted)'; }}>
+                      <Settings size={14} /> Settings
+                    </button>
+                    <div style={{ borderTop: '1px solid var(--app-border)', margin: '4px 0' }} />
+                  </>
+                )}
                 <button onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-3 py-2 cursor-pointer bg-transparent border-0 text-left"
                   style={{ fontSize: '13px', color: 'var(--red)' }}>
@@ -94,7 +121,7 @@ const AppNavbar = () => {
       {/* Mobile minimal navigation */}
       <nav className="md:hidden flex items-center gap-6 px-6 overflow-x-auto whitespace-nowrap hide-scrollbar"
         style={{ borderBottom: '1px solid var(--app-border)', paddingBottom: '10px', paddingTop: '10px' }}>
-        {mobileNavItems.map((item) => (
+        {mobileNavItems.filter(item => !item.allowedRoles || item.allowedRoles.includes(role)).map((item) => (
           <NavLink key={item.path} to={item.path} end={item.end}
             className="flex flex-col items-center gap-1 opacity-70 transition-opacity"
             style={({ isActive }) => ({
