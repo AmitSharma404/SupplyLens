@@ -54,22 +54,46 @@ const DashboardPreview = () => {
 
         {/* Chart label */}
         <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
-          Stock Trend — Last 30 Days
+          SupplyLens Intelligence Engine
         </p>
 
-        {/* Bar chart */}
-        <div className="flex items-end gap-[2px] mb-6" style={{ height: '100px' }}>
-          {barData.map((h, i) => (
-            <motion.div
-              key={i}
-              className="flex-1 rounded-t-[1px]"
-              style={{ background: 'rgba(255,255,255,0.4)' }}
-              initial={{ height: 0 }}
-              whileInView={{ height: `${h}%` }}
+        {/* Intelligence Engine Widgets instead of bars */}
+        <div className="flex gap-4 mb-6" style={{ height: '110px' }}>
+            <motion.div 
+              className="flex-1 rounded-xl p-4 flex flex-col justify-between"
+              style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02))', border: '1px solid rgba(16,185,129,0.2)' }}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.015, ease: 'easeOut' }}
-            />
-          ))}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: 600, color: '#10b981', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Auto-Reorder System</p>
+                <p style={{ fontSize: '13px', color: '#e5e5e5', marginTop: '6px', lineHeight: 1.4 }}>Predicting <span style={{ color: '#fff', fontWeight: 500 }}>Basmati Rice</span> depletion in 4 days.</p>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                 <span className="flex items-center justify-center w-4 h-4 rounded-full" style={{ background: '#10b981', color: '#fff', fontSize: '10px' }}>✓</span>
+                 <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>Purchase Order Generated</span>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="flex-1 rounded-xl p-4 flex flex-col justify-between"
+              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02))', border: '1px solid rgba(245,158,11,0.2)' }}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: 600, color: '#f59e0b', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Supplier Analytics</p>
+                <p style={{ fontSize: '13px', color: '#e5e5e5', marginTop: '6px', lineHeight: 1.4 }}>Global Farms Inc. delivery <span style={{ color: '#f59e0b' }}>delayed by 2 days</span>.</p>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                 <span className="flex items-center justify-center w-4 h-4 rounded-full" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '10px', fontWeight: 'bold' }}>!</span>
+                 <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>Safety Stock Engaged</span>
+              </div>
+            </motion.div>
         </div>
 
         {/* Live Feed */}
