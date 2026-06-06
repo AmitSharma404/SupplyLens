@@ -2,6 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { useEffect, useState } from 'react';
+import { getAlerts } from '../../Instance/API';
 import { logoutUser } from '../../redux/slices/authSlice';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -23,6 +25,21 @@ const AppSidebar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, role } = useAuth();
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    const fetchAlertCount = async () => {
+      try {
+        const res = await getAlerts(false); // unread only
+        setAlertCount(res.data?.length || 0);
+      } catch (err) {
+        console.error("Failed to fetch alert count");
+      }
+    };
+    if (user) fetchAlertCount();
+    const interval = setInterval(fetchAlertCount, 60000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -48,13 +65,20 @@ const AppSidebar = () => {
       <nav className="flex-1 px-3 mt-2 flex flex-col gap-0.5">
         {menuItems.filter(item => !item.allowedRoles || item.allowedRoles.includes(role)).map((item) => (
           <NavLink key={item.path} to={item.path} end={item.end}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 relative"
             style={({ isActive }) => ({
               fontSize: '13px', fontWeight: 500,
               color: isActive ? 'var(--app-text)' : 'var(--app-text-muted)',
               background: isActive ? 'var(--app-overlay)' : 'transparent',
             })}>
-            <item.icon size={16} />
+            <div className="relative">
+              <item.icon size={16} />
+              {item.label === 'Alerts' && alertCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full" 
+                  style={{ background: 'var(--red, #ef4444)', boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)' }}>
+                </span>
+              )}
+            </div>
             <span>{item.label}</span>
           </NavLink>
         ))}

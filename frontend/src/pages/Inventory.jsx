@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,11 +63,11 @@ const Inventory = () => {
         customerRef,
         note
       });
-      alert("Sale recorded. Stock updated.");
+      toast.success("Sale recorded. Stock updated.");
       setSaleModalOpen(false);
       dispatch(fetchProducts()); // refresh
     } catch (err) {
-      alert(err.message || "Failed to record sale");
+      toast.error(err.message || "Failed to record sale");
     }
   };
 
@@ -80,11 +81,11 @@ const Inventory = () => {
         reason: adjustReason,
         notes: note
       });
-      alert("Stock adjusted.");
+      toast.success("Stock adjusted.");
       setAdjustModalOpen(false);
       dispatch(fetchProducts()); // refresh
     } catch (err) {
-      alert(err.message || "Failed to adjust stock");
+      toast.error(err.message || "Failed to adjust stock");
     }
   };
 

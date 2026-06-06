@@ -42,7 +42,7 @@ const Signup = () => {
     } catch (err) {
       setShake(true);
       setTimeout(() => setShake(false), 600);
-      toast.error(err || 'Registration failed');
+      toast.error(typeof err === 'string' ? err : err?.message || 'Registration failed');
     }
   };
 
@@ -55,7 +55,7 @@ const Signup = () => {
     } catch (err) {
       setShake(true);
       setTimeout(() => setShake(false), 600);
-      toast.error(err || 'Google Login failed');
+      toast.error(typeof err === 'string' ? err : err?.message || 'Google Login failed');
     }
   };
 

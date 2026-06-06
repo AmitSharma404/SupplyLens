@@ -32,7 +32,7 @@ const Login = () => {
     } catch (err) {
       setShake(true);
       setTimeout(() => setShake(false), 600);
-      toast.error(err || 'Login failed');
+      toast.error(typeof err === 'string' ? err : err?.message || 'Login failed');
     }
   };
 
@@ -45,7 +45,7 @@ const Login = () => {
     } catch (err) {
       setShake(true);
       setTimeout(() => setShake(false), 600);
-      toast.error(err || 'Google Login failed');
+      toast.error(typeof err === 'string' ? err : err?.message || 'Google Login failed');
     }
   };
 
