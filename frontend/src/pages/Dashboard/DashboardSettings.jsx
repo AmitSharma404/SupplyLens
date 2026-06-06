@@ -1,17 +1,72 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Shield, Bell, Database, Users } from 'lucide-react';
+import { Settings, Shield, Bell, Database, Users, Download, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSelector } from 'react-redux';
 import { getUsers, updateUserRole } from '../../Instance/API';
 import RoleGuard from '../../components/RoleGuard';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+
+const ToggleSwitch = ({ enabled, onChange }) => (
+  <div 
+    onClick={() => onChange(!enabled)}
+    className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${enabled ? 'bg-[var(--accent)]' : 'bg-gray-200 dark:bg-gray-700'}`}
+    style={{ border: enabled ? 'none' : '1px solid var(--app-border)' }}
+  >
+    <motion.div 
+      layout
+      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      className={`w-4 h-4 bg-white rounded-full shadow-md`}
+      style={{ marginLeft: enabled ? '20px' : '0px' }}
+    />
+  </div>
+);
+
+const RoleBadge = ({ role }) => {
+  const styles = {
+    admin: { bg: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' },
+    manager: { bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)' },
+    staff: { bg: 'rgba(107, 114, 128, 0.1)', color: '#6b7280', border: '1px solid rgba(107, 114, 128, 0.2)' }
+  };
+  const s = styles[role?.toLowerCase()] || styles.staff;
+  
+  return (
+    <span className="px-2.5 py-1 text-xs font-semibold rounded-full capitalize flex items-center justify-center w-max" style={s}>
+      {role}
+    </span>
+  );
+};
+
 export const DashboardSettings = () => {
   const { user } = useSelector((state) => state.auth);
   const [threshold, setThreshold] = useState(25);
   const [usersList, setUsersList] = useState([]);
+  
+  const [notifications, setNotifications] = useState({
+    lowStock: true,
+    supplierDelay: true,
+    reorder: false,
+    weekly: false
+  });
 
-  const handleSave = (e) => { e.preventDefault(); toast.success('Settings saved'); };
+  const handleSave = (e) => { 
+    e.preventDefault(); 
+    toast.success('Settings saved successfully', {
+      description: 'Your inventory parameters have been updated.'
+    }); 
+  };
 
   const fetchAllUsers = async () => {
     try {
@@ -29,7 +84,7 @@ export const DashboardSettings = () => {
   const handleRoleChange = async (userId, newRole) => {
     try {
       await updateUserRole(userId, newRole);
-      toast.success('User role updated');
+      toast.success('User role updated successfully');
       fetchAllUsers();
     } catch (err) {
       toast.error(err.message || 'Failed to update role');
@@ -43,119 +98,220 @@ export const DashboardSettings = () => {
   }, [user]);
 
   return (
-    <motion.div className="p-8" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-      <h1 className="mb-8" style={{ fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 500, letterSpacing: '-1px' }}>Settings</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-4xl">
-        {/* Account */}
-        <div className="p-6 rounded-[16px] flex flex-col gap-5" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--app-overlay)', color: 'var(--app-text)' }}><Shield size={16} /></div>
-            <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>Account</h3><p style={{ fontSize: '12px', color: 'var(--app-text-muted)' }}>Login details</p></div>
-          </div>
-          {[{ label: 'Name', value: user?.name || 'User' }, { label: 'Email', value: user?.email || 'user@co.com' }, { label: 'Role', value: user?.role?.toUpperCase() || 'ADMIN' }].map(f => (
-            <div key={f.label}>
-              <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)', marginBottom: '6px' }}>{f.label}</p>
-              <p className="px-4 py-2.5 rounded-[10px]" style={{ fontSize: '14px', color: f.label === 'Role' ? 'var(--accent)' : 'var(--app-text)', background: 'var(--app-elevated)', border: '1px solid var(--app-border)' }}>{f.value}</p>
-            </div>
-          ))}
-        </div>
-        {/* Inventory Params */}
-        <div className="p-6 rounded-[16px] flex flex-col gap-5" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--app-overlay)', color: 'var(--app-text)' }}><Settings size={16} /></div>
-            <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>Inventory Parameters</h3><p style={{ fontSize: '12px', color: 'var(--app-text-muted)' }}>Thresholds</p></div>
-          </div>
-          <form onSubmit={handleSave} className="flex flex-col gap-5">
-            <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)', marginBottom: '8px' }}>Safety Threshold</label>
-              <div className="flex items-center gap-4">
-                <input type="range" min="10" max="50" value={threshold} onChange={e => setThreshold(Number(e.target.value))} className="flex-1" style={{ accentColor: 'var(--accent)' }} />
-                <span style={{ fontSize: '14px', fontWeight: 500, fontFamily: 'var(--font-mono)', color: 'var(--app-text)' }}>{threshold}%</span>
+    <motion.div 
+      className="p-8 pb-20 max-w-[1200px] mx-auto" 
+      initial="hidden" 
+      animate="show" 
+      variants={containerVariants}
+    >
+      <div className="flex flex-col mb-10">
+        <motion.h1 variants={itemVariants} className="text-3xl lg:text-4xl font-bold tracking-tight text-[var(--app-text)]">
+          Settings
+        </motion.h1>
+        <motion.p variants={itemVariants} className="text-sm text-[var(--app-text-muted)] mt-2">
+          Manage your account preferences and application parameters.
+        </motion.p>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        {/* Left Column (Account & Data) */}
+        <div className="flex flex-col gap-6 xl:col-span-1">
+          
+          {/* Account Settings */}
+          <motion.div variants={itemVariants} className="p-6 rounded-2xl flex flex-col gap-6" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 shadow-inner">
+                <Shield size={18} className="text-gray-700 dark:text-gray-300" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--app-text)]">My Account</h3>
+                <p className="text-xs text-[var(--app-text-muted)]">Personal details</p>
               </div>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)', marginBottom: '8px' }}>Lead Days Buffer</label>
-              <input type="number" defaultValue={3} className="w-full py-[10px] px-[14px] rounded-[10px] outline-none" style={{ background: 'var(--app-elevated)', border: '1px solid var(--app-border)', fontSize: '14px', color: 'var(--app-text)' }} />
+            
+            <div className="flex flex-col gap-4">
+              {[{ label: 'Name', value: user?.name || 'User' }, { label: 'Email', value: user?.email || 'user@co.com' }].map(f => (
+                <div key={f.label}>
+                  <p className="text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)] mb-1.5">{f.label}</p>
+                  <div className="px-4 py-2.5 rounded-xl text-sm text-[var(--app-text)] bg-[var(--app-elevated)] border border-[var(--app-border)] shadow-sm">
+                    {f.value}
+                  </div>
+                </div>
+              ))}
+              <div>
+                <p className="text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)] mb-1.5">Role</p>
+                <RoleBadge role={user?.role || 'admin'} />
+              </div>
             </div>
-            <button type="submit" className="btn-shimmer w-full py-[11px] rounded-[10px] cursor-pointer border-0" style={{ background: 'var(--accent)', color: '#000', fontSize: '14px', fontWeight: 500 }}>Save Settings</button>
-          </form>
-        </div>
-        {/* Notifications */}
-        <div className="p-6 rounded-[16px] flex flex-col gap-5" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--app-overlay)', color: 'var(--app-text)' }}><Bell size={16} /></div>
-            <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>Notifications</h3></div>
-          </div>
-          {[{ label: 'Low stock alerts', on: true }, { label: 'Supplier delay notifications', on: true }, { label: 'Reorder suggestions', on: false }, { label: 'Weekly digest', on: false }].map(item => (
-            <label key={item.label} className="flex items-center justify-between py-1 cursor-pointer">
-              <span style={{ fontSize: '13px', color: 'var(--app-text)' }}>{item.label}</span>
-              <input type="checkbox" defaultChecked={item.on} style={{ accentColor: 'var(--accent)' }} />
-            </label>
-          ))}
-        </div>
-        {/* Data */}
-        <div className="p-6 rounded-[16px] flex flex-col gap-5" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--app-overlay)', color: 'var(--app-text)' }}><Database size={16} /></div>
-            <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>Data & Integrations</h3></div>
-          </div>
-          <div>
-            <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.6px', textTransform: 'uppercase', color: 'var(--app-text-muted)', marginBottom: '6px' }}>API Key</p>
-            <input type="password" value="sk-••••••••••••" readOnly className="w-full py-[10px] px-[14px] rounded-[10px] outline-none" style={{ background: 'var(--app-elevated)', border: '1px solid var(--app-border)', fontSize: '13px', fontFamily: 'var(--font-mono)', color: 'var(--app-text-muted)' }} />
-          </div>
-          <button className="w-full py-[10px] rounded-[10px] cursor-pointer bg-transparent transition-colors" style={{ border: '1px solid var(--app-border)', fontSize: '13px', fontWeight: 500, color: 'var(--app-text-muted)' }}>Export All Data (CSV)</button>
-        </div>
+          </motion.div>
 
-        {/* User Management (Admin Only) */}
-        <RoleGuard allowedRoles={['admin']}>
-          <div className="p-6 rounded-[16px] flex flex-col gap-5 lg:col-span-2" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--app-overlay)', color: 'var(--app-text)' }}><Users size={16} /></div>
-              <div><h3 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--app-text)' }}>User Management</h3><p style={{ fontSize: '12px', color: 'var(--app-text-muted)' }}>Manage user roles and access</p></div>
+          {/* Data & Integrations */}
+          <motion.div variants={itemVariants} className="p-6 rounded-2xl flex flex-col gap-6" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 shadow-inner">
+                <Database size={18} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--app-text)]">Data Center</h3>
+                <p className="text-xs text-[var(--app-text-muted)]">Export & API Access</p>
+              </div>
             </div>
             
-            <div className="rounded-[12px] overflow-x-auto mt-6" style={{ border: '1px solid var(--app-border)' }}>
-              <table className="w-full text-left min-w-[600px]" style={{ borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--app-overlay)', borderBottom: '1px solid var(--app-border)' }}>
-                    <th className="py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>Name</th>
-                    <th className="py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>Email</th>
-                    <th className="py-3 px-4" style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--app-text-muted)' }}>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usersList.length === 0 ? (
-                    <tr><td colSpan="3" className="py-4 px-4 text-center text-[13px] text-[var(--app-text-muted)]">Loading users...</td></tr>
-                  ) : (
-                    usersList.map(u => (
-                      <tr key={u._id} style={{ borderBottom: '1px solid var(--app-border)' }}>
-                        <td className="py-3 px-4 text-[14px]" style={{ color: 'var(--app-text)' }}>{u.name} {u._id === user?._id && '(You)'}</td>
-                        <td className="py-3 px-4 text-[13px]" style={{ color: 'var(--app-text-muted)' }}>{u.email}</td>
-                        <td className="py-3 px-4">
-                          <select 
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                            disabled={u._id === user?._id}
-                            className="px-2 py-1.5 rounded-[6px] text-[12px] font-medium outline-none cursor-pointer"
-                            style={{ 
-                              background: 'var(--app-elevated)', 
-                              border: '1px solid var(--app-border)', 
-                              color: u.role === 'admin' ? 'var(--accent)' : 'var(--app-text)' 
-                            }}
-                          >
-                            <option value="admin">Admin</option>
-                            <option value="manager">Manager</option>
-                            <option value="warehouse_staff">Staff</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div>
+              <p className="text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)] mb-1.5">API Key</p>
+              <div className="flex gap-2">
+                <input type="password" value="sk-••••••••••••" readOnly className="flex-1 py-2.5 px-4 rounded-xl outline-none text-sm font-mono text-[var(--app-text-muted)] bg-[var(--app-elevated)] border border-[var(--app-border)] shadow-sm" />
+              </div>
             </div>
+            <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-[var(--app-overlay)] text-[var(--app-text)] border border-[var(--app-border)] shadow-sm">
+              <Download size={16} /> Export All CSV
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Right Column (Inventory, Notifications, Users) */}
+        <div className="flex flex-col gap-6 xl:col-span-2">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Inventory Params */}
+            <motion.div variants={itemVariants} className="p-6 rounded-2xl flex flex-col gap-6" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 shadow-inner">
+                  <Settings size={18} className="text-[var(--accent)]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--app-text)]">Inventory Params</h3>
+                  <p className="text-xs text-[var(--app-text-muted)]">Global Thresholds</p>
+                </div>
+              </div>
+              
+              <form onSubmit={handleSave} className="flex flex-col gap-6">
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)]">Safety Threshold</label>
+                    <span className="text-sm font-mono font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-0.5 rounded-md">{threshold}%</span>
+                  </div>
+                  <input type="range" min="10" max="50" value={threshold} onChange={e => setThreshold(Number(e.target.value))} className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 dark:bg-gray-700 accent-[var(--accent)]" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)] mb-2">Lead Days Buffer</label>
+                  <input type="number" defaultValue={3} className="w-full py-2.5 px-4 rounded-xl outline-none text-sm text-[var(--app-text)] bg-[var(--app-elevated)] border border-[var(--app-border)] shadow-sm focus:border-[var(--accent)] transition-colors" />
+                </div>
+                <button type="submit" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 shadow-lg shadow-[var(--accent)]/20" style={{ background: 'var(--accent)' }}>
+                  <Save size={16} /> Save Changes
+                </button>
+              </form>
+            </motion.div>
+
+            {/* Notifications */}
+            <motion.div variants={itemVariants} className="p-6 rounded-2xl flex flex-col gap-6" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 shadow-inner">
+                  <Bell size={18} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--app-text)]">Alert Preferences</h3>
+                  <p className="text-xs text-[var(--app-text-muted)]">System triggers</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-4 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--app-text)]">Low stock alerts</span>
+                  <ToggleSwitch enabled={notifications.lowStock} onChange={(v) => setNotifications(prev => ({...prev, lowStock: v}))} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--app-text)]">Supplier delays</span>
+                  <ToggleSwitch enabled={notifications.supplierDelay} onChange={(v) => setNotifications(prev => ({...prev, supplierDelay: v}))} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--app-text)]">Reorder suggestions</span>
+                  <ToggleSwitch enabled={notifications.reorder} onChange={(v) => setNotifications(prev => ({...prev, reorder: v}))} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[var(--app-text)]">Weekly digest</span>
+                  <ToggleSwitch enabled={notifications.weekly} onChange={(v) => setNotifications(prev => ({...prev, weekly: v}))} />
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </RoleGuard>
+
+          {/* User Management */}
+          <RoleGuard allowedRoles={['admin']}>
+            <motion.div variants={itemVariants} className="p-6 rounded-2xl flex flex-col gap-6 w-full overflow-hidden" style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 shadow-inner">
+                  <Users size={18} className="text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[var(--app-text)]">Team Management</h3>
+                  <p className="text-xs text-[var(--app-text-muted)]">Assign roles and access levels</p>
+                </div>
+              </div>
+              
+              <div className="rounded-xl overflow-x-auto border border-[var(--app-border)] shadow-sm">
+                <table className="w-full text-left min-w-[600px] border-collapse bg-[var(--app-elevated)]">
+                  <thead>
+                    <tr className="bg-[var(--app-overlay)] border-b border-[var(--app-border)]">
+                      <th className="py-3 px-5 text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)]">User</th>
+                      <th className="py-3 px-5 text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)]">Role Access</th>
+                      <th className="py-3 px-5 text-xs font-semibold tracking-wider uppercase text-[var(--app-text-muted)] text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersList.length === 0 ? (
+                      <tr><td colSpan="3" className="py-8 px-5 text-center text-sm text-[var(--app-text-muted)]">No users found.</td></tr>
+                    ) : (
+                      usersList.map((u, i) => (
+                        <motion.tr 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          key={u._id} 
+                          className="border-b border-[var(--app-border)] last:border-0 hover:bg-[var(--app-overlay)] transition-colors"
+                        >
+                          <td className="py-4 px-5">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300 shadow-inner">
+                                {u.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-[var(--app-text)]">{u.name} {u._id === user?._id && <span className="text-xs font-normal text-[var(--app-text-muted)] ml-1">(You)</span>}</span>
+                                <span className="text-xs text-[var(--app-text-muted)]">{u.email}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-5">
+                            <RoleBadge role={u.role} />
+                          </td>
+                          <td className="py-4 px-5 text-right">
+                            <select 
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                              disabled={u._id === user?._id}
+                              className="px-3 py-1.5 rounded-lg text-sm font-medium outline-none cursor-pointer transition-shadow focus:ring-2 focus:ring-[var(--accent)]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ 
+                                background: 'var(--app-surface)', 
+                                border: '1px solid var(--app-border)', 
+                                color: 'var(--app-text)' 
+                              }}
+                            >
+                              <option value="admin">Admin</option>
+                              <option value="manager">Manager</option>
+                              <option value="staff">Staff</option>
+                            </select>
+                          </td>
+                        </motion.tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          </RoleGuard>
+
+        </div>
       </div>
     </motion.div>
   );

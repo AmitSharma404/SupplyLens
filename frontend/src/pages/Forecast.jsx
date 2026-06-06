@@ -92,6 +92,10 @@ const Forecast = () => {
         </div>
       </div>
 
+      <div className="mb-8 p-4 rounded-[12px] bg-[var(--app-overlay)] border border-[var(--app-border)] flex items-center justify-center shadow-sm">
+        <p className="text-[var(--accent)] font-medium text-sm">⚠️ This feature is not ready yet</p>
+      </div>
+
       {loading ? (
         <div className="p-8 flex items-center justify-center min-h-[40vh]">
             <div className="animate-pulse" style={{ color: 'var(--app-text-muted)' }}>Calculating forecast...</div>
