@@ -6,7 +6,7 @@ import { OAuth2Client } from "google-auth-library";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Name, email and password are required" });
@@ -26,6 +26,7 @@ export const register = async (req, res) => {
       name,
       email: normalizedEmail,
       password: hashedPassword,
+      role: role || 'staff',
     });
 
     await newUser.save();
@@ -62,7 +63,7 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
@@ -151,7 +152,7 @@ export const googleAuth = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );

@@ -9,25 +9,25 @@ import {
     getProductMovements,
     getReorderPoint
 } from "../controllers/productController.js";
-import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const productRouter = express.Router();
 
 productRouter.route("/")
-    .post(protectedRoute, verifyRole(["admin", "manager"]), createProduct)
-    .get(protectedRoute, getProducts);
+    .post(protect, authorize(["admin", "manager"]), createProduct)
+    .get(protect, getProducts);
 
 productRouter.route("/:id")
-    .get(protectedRoute, getProductById)
-    .put(protectedRoute, verifyRole(["admin", "manager"]), updateProduct)
-    .delete(protectedRoute, verifyRole(["admin"]), deleteProduct);
+    .get(protect, getProductById)
+    .put(protect, authorize(["admin", "manager"]), updateProduct)
+    .delete(protect, authorize(["admin"]), deleteProduct);
 
 productRouter.route("/:id/movements")
-    .post(protectedRoute, createStockMovement)
-    .get(protectedRoute, getProductMovements);
+    .post(protect, createStockMovement)
+    .get(protect, getProductMovements);
 
 productRouter.route("/:id/reorder-point")
-    .get(protectedRoute, getReorderPoint);
+    .get(protect, getReorderPoint);
 
 
 export default productRouter;
