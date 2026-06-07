@@ -1,33 +1,16 @@
-import Supplier from "../Models/supplierModels.js";
-export const addSupplier = async (req, res) => {
-  const {
-    name,
-    email,
-    address,
-    phone,
-    contactPerson,
-    averageDeliveryDate,
-    relibilityScore,
-  } = req.body;
+import Supplier from "../models/Supplier.js";
+import PurchaseOrder from "../models/PurchaseOrder.js";
 
-  const existingSupplier = await Supplier.findOne({ name });
-  if (existingSupplier) {
-    return res.status(400).json({ 
-        message: "Supplier already exists" 
-    });
-  }
+// @desc    Create a new supplier
+// @route   POST /api/suppliers
+// @access  Private
+export const createSupplier = async (req, res) => {
+    try {
+        const { name, contactPerson, email, phone, address } = req.body;
 
-  try {
-    // Create a new supplier document
-    const newSupplier = new Supplier({
-      name,
-      email,
-      address,
-      phone,
-      contactPerson,
-      averageDeliveryDate,
-      relibilityScore,
-    });
+        if (!name || !contactPerson || !email || !phone || !address) {
+            return res.status(400).json({ success: false, message: "Please provide all required fields." });
+        }
 
         const supplierExists = await Supplier.findOne({ email, organization: req.user.organization });
         if (supplierExists) {

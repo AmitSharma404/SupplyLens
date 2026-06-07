@@ -1,4 +1,7 @@
-import Product from "../Models/product.model.js";
+import Product from "../models/Product.js";
+import StockMovement from "../models/StockMovement.js";
+import Supplier from "../models/Supplier.js";
+import { calculateReorderPoint } from "../utils/inventoryUtils.js";
 
 
 // @desc    Create a new product
@@ -344,39 +347,15 @@ export const getReorderPoint = async (req, res) => {
         const averageDailyDemand = totalSold / 30;
 
         res.status(200).json({
-            msg:"Products fetched successfully",
-            products
+            success: true,
+            data: {
+                reorderPoint,
+                averageDailyDemand,
+                supplierLeadDays: product.supplier ? product.supplier.averageDeliveryDays : 0,
+                safetyStock: product.safetyStock
+            }
         });
     } catch (error) {
-        console.error('Error fetching products:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ success: false, message: error.message || "Server Error" });
     }
 };
-
-export const addProduct = async (req, res) => {
-    try {
-        const { name, sku, category, description, price, minimumStockLevel, safetyStock, supplierId } = req.body;
-
-        
-        const newProduct = new Product({
-            name,
-            sku,
-            category,
-            description,
-            price,
-            minimumStockLevel,
-            safetyStock,
-            supplierId
-        });
-
-        // Save the product to the database
-        const savedProduct = await newProduct.save();
-        res.status(201).json({
-            msg: "Product added successfully",
-            product: savedProduct
-        });
-    } catch (error) {
-        console.error('Error adding product:', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}

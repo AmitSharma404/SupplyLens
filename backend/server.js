@@ -3,10 +3,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
-import appRouter from './Routes/auth.routes.js';
+import appRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
+import productRouter from './routes/productRoutes.js';
+import supplierRouter from './routes/supplierRoutes.js';
+import orderRouter from './routes/orderRoutes.js';
+import dashboardRouter from './routes/dashboardRoutes.js';
+import stockRouter from './routes/stockRoutes.js';
+import alertRouter from './routes/alertRoutes.js';
+import forecastRouter from './routes/forecastRoutes.js';
 import cookieParser from 'cookie-parser';
-import supplierRoute from './Routes/supplier.route.js';
-import orderRouter from './Routes/order.routes.js';
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -22,10 +28,16 @@ connectDB();
 // routes
 
 app.use('/api/auth', appRouter);
+app.use('/api/users', userRouter);
+app.use('/api/products', productRouter);
+app.use('/api/suppliers', supplierRouter);
+app.use('/api/orders', orderRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/stock', stockRouter);
+app.use('/api/alerts', alertRouter);
+app.use('/api/forecast', forecastRouter);
 
-app.get('/api/auth', (req, res) => {
-    res.send('Hello World!');
-});
+
 
 
 app.listen(PORT, () => {
