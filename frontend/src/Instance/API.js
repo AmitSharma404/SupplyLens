@@ -1,6 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 const DEFAULT_ERROR_MESSAGE = "Something went wrong";
-const ORDER_API_URL = "/api/orders";
 
 const parseResponseBody = async (response) => {
     const contentType = response.headers.get("content-type") || "";
@@ -19,25 +18,6 @@ const request = async (endpoint, options = {}) => {
         headers: {
             "Content-Type": "application/json",
             ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-            ...(options.headers || {}),
-        },
-        ...options,
-    });
-
-    const data = await parseResponseBody(response);
-
-    if (!response.ok) {
-        throw new Error(data?.message || DEFAULT_ERROR_MESSAGE);
-    }
-
-    return data;
-};
-
-const orderRequest = async (endpoint, options = {}) => {
-    const response = await fetch(`${ORDER_API_URL}${endpoint}`, {
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
             ...(options.headers || {}),
         },
         ...options,
@@ -247,7 +227,16 @@ export const getOrders = async () => {
     }
 }
 
-
+export const createOrder = async (orderData) => {
+    try {
+        return await request('/orders', {
+            method: 'POST',
+            body: JSON.stringify(orderData),
+        });
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
 
 export const updateOrderStatus = async (id, status) => {
     try {
@@ -302,17 +291,6 @@ export const updateUserRole = async (id, role) => {
         return await request(`/users/${id}/role`, {
             method: 'PUT',
             body: JSON.stringify({ role }),
-        });
-    } catch (error) {
-        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
-    }
-}
-
-export const createOrder = async (orderData) => {
-    try {
-        return await orderRequest('/create', {
-            method: 'POST',
-            body: JSON.stringify(orderData),
         });
     } catch (error) {
         throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);

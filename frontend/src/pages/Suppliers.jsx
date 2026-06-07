@@ -80,7 +80,7 @@ const Suppliers = () => {
           return (
             <motion.div
               key={s._id || s.id}
-              className="p-5 rounded-[16px] flex items-center gap-4 transition-all duration-200 group"
+              className="p-5 rounded-2xl flex items-center gap-4 transition-all duration-200 group"
               style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}

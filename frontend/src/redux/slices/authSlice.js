@@ -28,6 +28,15 @@ export const loginUser = createAsyncThunk("auth/login", async (credentials, thun
   }
 });
 
+export const googleLoginUser = createAsyncThunk("auth/googleLogin", async (credential, thunkAPI) => {
+  try {
+    const data = await googleLoginRequest(credential);
+    return data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.message || "Google Login failed");
+  }
+});
+
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (payload, thunkAPI) => {
