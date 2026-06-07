@@ -1,13 +1,13 @@
 import express from "express";
 import { stockIn, stockOut, getStockHistory, stockSell, stockAdjust } from "../controllers/stockController.js";
-import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const stockRouter = express.Router();
 
-stockRouter.post("/in", protectedRoute, stockIn);
-stockRouter.post("/out", protectedRoute, stockOut);
-stockRouter.post("/sell", protectedRoute, verifyRole(["warehouse_staff", "manager", "admin"]), stockSell);
-stockRouter.post("/adjust", protectedRoute, verifyRole(["warehouse_staff", "manager", "admin"]), stockAdjust);
-stockRouter.get("/history/:productId", protectedRoute, getStockHistory);
+stockRouter.post("/in", protect, stockIn);
+stockRouter.post("/out", protect, stockOut);
+stockRouter.post("/sell", protect, authorize(["staff", "manager", "admin"]), stockSell);
+stockRouter.post("/adjust", protect, authorize(["staff", "manager", "admin"]), stockAdjust);
+stockRouter.get("/history/:productId", protect, getStockHistory);
 
 export default stockRouter;

@@ -21,7 +21,7 @@ const NodeDiagram = () => {
   const cx = 199, cy = 137, r = 45;
 
   return (
-    <svg width="420" height="320" viewBox="0 0 420 320" fill="none">
+    <svg width="100%" height="auto" viewBox="0 0 420 320" style={{ maxWidth: '420px' }} fill="none">
       {/* Connection lines */}
       {nodes.map((n, i) => (
         <motion.line
@@ -77,20 +77,20 @@ const Hero = () => {
             }}
           >
             <motion.div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-7"
-              style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8"
+              style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', boxShadow: '0 2px 10px rgba(34,197,94,0.05)' }}
               variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } }}
             >
               <span
-                className="w-2 h-2 rounded-full"
+                className="w-2.5 h-2.5 rounded-full"
                 style={{ background: '#22c55e', animation: 'pulse-dot 2s ease-in-out infinite' }}
               />
-              <span style={{ fontSize: '12px', fontWeight: 500, color: '#166534' }}>Now in public beta</span>
+              {/* <span style={{ fontSize: '14px', fontWeight: 500, color: '#166534' }}>Now in public beta</span> */}
             </motion.div>
 
             <motion.h1
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } }}
-              style={{ fontSize: 'clamp(40px, 5.5vw, 56px)', fontWeight: 500, letterSpacing: '-2px', lineHeight: 1.08 }}
+              style={{ fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 500, letterSpacing: '-2px', lineHeight: 1.08 }}
             >
               Full visibility.
               <br />
@@ -98,8 +98,8 @@ const Hero = () => {
             </motion.h1>
 
             <motion.p
-              className="mt-5"
-              style={{ fontSize: '15px', lineHeight: 1.65, color: '#64748b', maxWidth: '400px' }}
+              className="mt-6"
+              style={{ fontSize: '17px', lineHeight: 1.65, color: '#64748b', maxWidth: '440px' }}
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } }}
             >
               SupplyLens gives SMEs real-time inventory tracking,
@@ -108,19 +108,19 @@ const Hero = () => {
             </motion.p>
 
             <motion.div
-              className="flex items-center gap-3 mt-8"
+              className="flex items-center gap-4 mt-10"
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20 } } }}
             >
               <Link to="/signup">
-                <button className="px-5 py-2.5 rounded-[10px] cursor-pointer border-0"
-                  style={{ background: '#111', color: '#fff', fontSize: '14px', fontWeight: 500 }}>
+                <button className="px-6 py-3 rounded-[12px] cursor-pointer border-0"
+                  style={{ background: '#111', color: '#fff', fontSize: '16px', fontWeight: 500 }}>
                   Start for free
                 </button>
               </Link>
               <a href="#features">
-                <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-[10px] cursor-pointer"
-                  style={{ background: 'transparent', border: '1px solid #e5e5e5', color: '#555', fontSize: '14px', fontWeight: 450 }}>
-                  See a demo <span style={{ fontSize: '14px' }}>→</span>
+                <button className="flex items-center gap-1.5 px-5 py-3 rounded-[12px] cursor-pointer"
+                  style={{ background: 'transparent', border: '1px solid #e5e5e5', color: '#555', fontSize: '16px', fontWeight: 450 }}>
+                  See a demo <span style={{ fontSize: '16px' }}>→</span>
                 </button>
               </a>
             </motion.div>

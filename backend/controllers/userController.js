@@ -2,7 +2,8 @@ import User from '../models/User.js';
 
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find({}).select('-password');
+        const org = req.user.organization || 'Legacy Workspace';
+        const users = await User.find({ organization: org }).select('-password');
         res.json(users);
     } catch (error) {
         console.error("Error in getAllUsers:", error);
@@ -15,7 +16,7 @@ export const updateUserRole = async (req, res) => {
         const { id } = req.params;
         const { role } = req.body;
 
-        if (!['admin', 'manager', 'warehouse_staff'].includes(role)) {
+        if (!['admin', 'manager', 'staff'].includes(role)) {
             return res.status(400).json({ message: 'Invalid role' });
         }
 

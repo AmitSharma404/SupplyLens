@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,11 +63,11 @@ const Inventory = () => {
         customerRef,
         note
       });
-      alert("Sale recorded. Stock updated.");
+      toast.success("Sale recorded. Stock updated.");
       setSaleModalOpen(false);
       dispatch(fetchProducts()); // refresh
     } catch (err) {
-      alert(err.message || "Failed to record sale");
+      toast.error(err.message || "Failed to record sale");
     }
   };
 
@@ -80,11 +81,11 @@ const Inventory = () => {
         reason: adjustReason,
         notes: note
       });
-      alert("Stock adjusted.");
+      toast.success("Stock adjusted.");
       setAdjustModalOpen(false);
       dispatch(fetchProducts()); // refresh
     } catch (err) {
-      alert(err.message || "Failed to adjust stock");
+      toast.error(err.message || "Failed to adjust stock");
     }
   };
 
@@ -172,8 +173,8 @@ const Inventory = () => {
       </div>
 
       {/* Table */}
-      <div className="rounded-[12px] overflow-hidden" style={{ border: '1px solid var(--app-border)' }}>
-        <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+      <div className="rounded-[12px] overflow-x-auto" style={{ border: '1px solid var(--app-border)' }}>
+        <table className="w-full min-w-[800px]" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--app-border)', background: 'var(--app-surface)' }}>
               {['Product', 'SKU', 'Stock', 'Status', 'Actions'].map(h => (

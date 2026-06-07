@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const CTABand = () => (
-  <section style={{ paddingTop: '80px', paddingBottom: '100px' }}>
-    <div className="mx-auto px-8" style={{ maxWidth: '1200px' }}>
+  <section className="py-16 md:pt-20 md:pb-[100px]">
+    <div className="mx-auto px-6 md:px-8" style={{ maxWidth: '1200px' }}>
       <motion.div
         className="rounded-3xl px-8 py-16 md:px-16 md:py-24 text-center relative overflow-hidden"
         style={{ background: '#09090b' }}

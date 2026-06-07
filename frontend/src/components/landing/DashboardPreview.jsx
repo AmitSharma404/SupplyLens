@@ -31,7 +31,7 @@ const DashboardPreview = () => {
           <span className="w-[10px] h-[10px] rounded-full" style={{ background: '#febc2e' }} />
           <span className="w-[10px] h-[10px] rounded-full" style={{ background: '#28c840' }} />
         </div>
-        <div className="ml-3" style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>
+        <div className="ml-3" style={{ fontSize: '12px', color: '#888', fontFamily: 'var(--font-mono)' }}>
           dashboard.jsx
         </div>
       </div>
@@ -39,13 +39,13 @@ const DashboardPreview = () => {
       {/* Dashboard content */}
       <div className="p-6" style={{ background: '#111' }}>
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {stats.map(s => (
             <div key={s.label} className="p-4 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-              <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>
+              <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>
                 {s.label}
               </p>
-              <p style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.5px', color: s.color || '#f5f5f5' }}>
+              <p style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '-0.5px', color: s.color || '#f5f5f5' }}>
                 {s.value}
               </p>
             </div>
@@ -53,28 +53,52 @@ const DashboardPreview = () => {
         </div>
 
         {/* Chart label */}
-        <p style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
-          Stock Trend — Last 30 Days
+        <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>
+          SupplyLens Intelligence Engine
         </p>
 
-        {/* Bar chart */}
-        <div className="flex items-end gap-[2px] mb-6" style={{ height: '100px' }}>
-          {barData.map((h, i) => (
-            <motion.div
-              key={i}
-              className="flex-1 rounded-t-[1px]"
-              style={{ background: 'rgba(255,255,255,0.4)' }}
-              initial={{ height: 0 }}
-              whileInView={{ height: `${h}%` }}
+        {/* Intelligence Engine Widgets instead of bars */}
+        <div className="flex gap-4 mb-6" style={{ height: '110px' }}>
+            <motion.div 
+              className="flex-1 rounded-xl p-4 flex flex-col justify-between"
+              style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02))', border: '1px solid rgba(16,185,129,0.2)' }}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.015, ease: 'easeOut' }}
-            />
-          ))}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: 600, color: '#10b981', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Auto-Reorder System</p>
+                <p style={{ fontSize: '13px', color: '#e5e5e5', marginTop: '6px', lineHeight: 1.4 }}>Predicting <span style={{ color: '#fff', fontWeight: 500 }}>Basmati Rice</span> depletion in 4 days.</p>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                 <span className="flex items-center justify-center w-4 h-4 rounded-full" style={{ background: '#10b981', color: '#fff', fontSize: '10px' }}>✓</span>
+                 <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>Purchase Order Generated</span>
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="flex-1 rounded-xl p-4 flex flex-col justify-between"
+              style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02))', border: '1px solid rgba(245,158,11,0.2)' }}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: 600, color: '#f59e0b', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Supplier Analytics</p>
+                <p style={{ fontSize: '13px', color: '#e5e5e5', marginTop: '6px', lineHeight: 1.4 }}>Global Farms Inc. delivery <span style={{ color: '#f59e0b' }}>delayed by 2 days</span>.</p>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                 <span className="flex items-center justify-center w-4 h-4 rounded-full" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '10px', fontWeight: 'bold' }}>!</span>
+                 <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>Safety Stock Engaged</span>
+              </div>
+            </motion.div>
         </div>
 
         {/* Live Feed */}
         <div style={{ borderTop: '1px solid #2a2a2a', paddingTop: '16px' }}>
-          <p style={{ fontSize: '9px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '12px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#888', marginBottom: '12px' }}>
             LIVE FEED
           </p>
           <motion.div
@@ -98,11 +122,11 @@ const DashboardPreview = () => {
               >
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: item.color }} />
-                  <span style={{ fontSize: '11px', color: '#e5e5e5', fontFamily: 'var(--font-mono)' }}>{item.name}</span>
+                  <span style={{ fontSize: '12px', color: '#e5e5e5', fontFamily: 'var(--font-mono)' }}>{item.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span style={{ fontSize: '11px', color: '#888', fontFamily: 'var(--font-mono)' }}>{item.qty}</span>
-                  <span style={{ fontSize: '11px', color: item.color, fontFamily: 'var(--font-mono)' }}>{item.status}</span>
+                  <span style={{ fontSize: '12px', color: '#888', fontFamily: 'var(--font-mono)' }}>{item.qty}</span>
+                  <span style={{ fontSize: '12px', color: item.color, fontFamily: 'var(--font-mono)' }}>{item.status}</span>
                 </div>
               </motion.div>
             ))}

@@ -1,10 +1,10 @@
 import express from "express";
 import { getAlerts, markAlertRead } from "../controllers/alertController.js";
-import { protectedRoute } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const alertRouter = express.Router();
 
-alertRouter.get("/", protectedRoute, getAlerts);
-alertRouter.put("/:id/read", protectedRoute, markAlertRead);
+alertRouter.get("/", protect, getAlerts);
+alertRouter.put("/:id/read", protect, markAlertRead);
 
 export default alertRouter;

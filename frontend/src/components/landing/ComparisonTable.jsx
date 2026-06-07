@@ -13,8 +13,8 @@ const data = [
 ];
 
 const ComparisonTable = () => (
-  <section id="compare" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
-    <div className="mx-auto px-8" style={{ maxWidth: '1200px' }}>
+  <section id="compare" className="py-16 md:py-[120px]">
+    <div className="mx-auto px-6 md:px-8" style={{ maxWidth: '1200px' }}>
       <motion.div className="mb-10"
         initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
         <p style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '1px', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>Why SupplyLens</p>

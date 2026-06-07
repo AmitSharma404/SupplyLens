@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 const AuthBox = ({ children, shake = false }) => {
   return (
     <motion.div
-      className="w-full max-w-[400px] p-8 rounded-2xl"
+      className="w-full max-w-[400px] p-6 md:p-8 rounded-2xl"
       style={{
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border)',

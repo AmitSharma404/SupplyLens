@@ -14,12 +14,23 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: function() {
+            return !this.googleId;
+        }
+    },
+    googleId: {
+        type: String,
+        sparse: true,
+        unique: true
     },
     role: {
         type: String,
-        enum: ['admin', 'manager', 'warehouse_staff'],
-        default: 'warehouse_staff'
+        enum: ['admin', 'manager', 'staff'],
+        default: 'staff'
+    },
+    organization: {
+        type: String,
+        default: 'Legacy Workspace'
     }
 }, { timestamps: true });
 

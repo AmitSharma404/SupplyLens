@@ -79,6 +79,21 @@ export const login = async (credentials) => {
     }
 }
 
+export const googleLogin = async (credential) => {
+    try {
+        const data = await request('/auth/google', {
+            method: 'POST',
+            body: JSON.stringify({ credential }),
+        });
+        if (data && data.token) {
+            localStorage.setItem('token', data.token);
+        }
+        return data;
+    } catch (error) {
+        throw new Error(error?.message || DEFAULT_ERROR_MESSAGE);
+    }
+}
+
 export const logout = async () => {
     try {
         const data = await request('/auth/logout', {

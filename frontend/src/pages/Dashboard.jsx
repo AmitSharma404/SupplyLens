@@ -7,12 +7,6 @@ import { fetchDashboardStats } from '../redux/slices/dashboardSlice';
 import StatCard from '../components/app/StatCard';
 import AlertRow from '../components/app/AlertRow';
 
-const stockData = [
-  { month: 'Jul', value: 180 }, { month: 'Aug', value: 220 },
-  { month: 'Sep', value: 195 }, { month: 'Oct', value: 260 },
-  { month: 'Nov', value: 240 }, { month: 'Dec', value: 310 },
-];
-
 const supplierData = [
   { month: 'Jul', agritrade: 92, foodsupply: 80, primepack: 88 },
   { month: 'Aug', agritrade: 94, foodsupply: 83, primepack: 91 },
@@ -20,14 +14,6 @@ const supplierData = [
   { month: 'Oct', agritrade: 96, foodsupply: 85, primepack: 93 },
   { month: 'Nov', agritrade: 95, foodsupply: 82, primepack: 90 },
   { month: 'Dec', agritrade: 97, foodsupply: 86, primepack: 94 },
-];
-
-const fallbackAlerts = [
-  { dot: 'red', message: 'Wheat Flour 10kg stock critical — 12 units remaining', priority: 'high', date: 'Just now' },
-  { dot: 'amber', message: 'Sunflower Oil 1L approaching reorder point', priority: 'medium', date: '2h ago' },
-  { dot: 'green', message: 'Rice Flour 5kg restocked — 284 units received', priority: 'low', date: '4h ago' },
-  { dot: 'blue', message: 'QuickShip Pvt. delivery delayed by 2 days', priority: 'medium', date: '6h ago' },
-  { dot: 'amber', message: 'Sugar 50kg Bag forecast suggests 40% demand spike', priority: 'medium', date: '1d ago' },
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -51,11 +37,6 @@ const Dashboard = () => {
   }, [dispatch]);
 
   const stats = dashboardData?.stats || {};
-  const backendAlerts = dashboardData?.alerts || [];
-
-  const rawInventoryValue = stats.totalInventoryValue 
-    ? parseFloat(stats.totalInventoryValue.replace(/[$,]/g, '')) 
-    : 124500;
 
   if (loading) {
     return (
@@ -72,42 +53,35 @@ const Dashboard = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Stat Cards */}
+      {/* Stat Cards - Overview */}
+      <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--app-text)', marginBottom: '16px' }}>Business Overview</h2>
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8"
+        initial="initial"
+        animate="animate"
+        variants={{ animate: { transition: { staggerChildren: 0.08 } } }}
+      >
+        <StatCard label="Total Products" value={stats.totalProducts || 0} icon={Package} link="/dashboard/inventory" trend={12} />
+        <StatCard label="Total Inventory Value" value={stats.totalInventoryValue || '$0.00'} icon={Package} link="/dashboard/inventory" trend={4} />
+        <StatCard label="Overall Success Rate" value={stats.successRate || '0%'} icon={Users} link="/dashboard/suppliers" trend={2} />
+      </motion.div>
+
+      {/* Stat Cards - Actionable */}
+      <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--app-text)', marginBottom: '16px' }}>Action Required</h2>
       <motion.div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         initial="initial"
         animate="animate"
         variants={{ animate: { transition: { staggerChildren: 0.08 } } }}
       >
-        <StatCard label="Products Needing Reorder" value={stats.productsNeedingReorder || 0} icon={Package} link="/dashboard/inventory" trend={4} />
-        <StatCard label="Orders Awaiting Approval" value={stats.pendingReordersCount || 0} icon={ShoppingCart} link="/dashboard/orders" trend={-2} />
-        <StatCard label="Low Stock Items" value={stats.lowStockCount || 0} accentBorder="var(--amber)" icon={AlertTriangle} link="/dashboard/inventory" trend={12} />
-        <StatCard label="Suppliers With Delays" value={stats.suppliersWithDelays || 0} accentBorder="var(--red)" icon={Users} link="/dashboard/suppliers" trend={-5} />
+        <StatCard label="Products Needing Reorder" value={stats.productsNeedingReorder || 0} accentBorder="var(--amber)" icon={Package} link="/dashboard/inventory" />
+        <StatCard label="Low Stock Items" value={stats.lowStockCount || 0} accentBorder="var(--amber)" icon={AlertTriangle} link="/dashboard/inventory" />
+        <StatCard label="Orders Awaiting Approval" value={stats.pendingReordersCount || 0} accentBorder="var(--blue)" icon={ShoppingCart} link="/dashboard/orders" />
+        <StatCard label="Suppliers With Delays" value={stats.suppliersWithDelays || 0} accentBorder="var(--red)" icon={Users} link="/dashboard/suppliers" />
       </motion.div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        {/* Stock Trend */}
-        <motion.div
-          className="p-6 rounded-[16px]"
-          style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--app-text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '24px' }}>
-            Stock Trend — Last 6 Months
-          </h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={stockData}>
-              <XAxis dataKey="month" tick={{ fill: 'var(--app-text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: 'var(--app-text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-              <Bar dataKey="value" name="Units" fill="var(--accent)" radius={[4, 4, 0, 0]} fillOpacity={0.7} />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-
+      <div className="grid grid-cols-1 gap-4 mb-8">
         {/* Supplier Performance */}
         <motion.div
           className="p-6 rounded-[16px]"
@@ -117,9 +91,9 @@ const Dashboard = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
         >
           <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--app-text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '24px' }}>
-            Supplier Reliability
+            Supplier Reliability (On-Time Delivery Rate)
           </h3>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={260}>
             <LineChart data={supplierData}>
               <XAxis dataKey="month" tick={{ fill: 'var(--app-text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis domain={[70, 100]} tick={{ fill: 'var(--app-text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -131,42 +105,6 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </motion.div>
       </div>
-
-      {/* Recent Alerts */}
-      <motion.div
-        className="p-6 rounded-[16px]"
-        style={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <h3 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--app-text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '16px' }}>
-          Recent Alerts
-        </h3>
-        {backendAlerts.length > 0 ? (
-          backendAlerts.map((alert, i) => (
-            <AlertRow
-              key={i}
-              index={i}
-              dot={alert.dot}
-              message={alert.title}
-              subLabel={alert.sub}
-              date={alert.time}
-            />
-          ))
-        ) : (
-          fallbackAlerts.map((alert, i) => (
-            <AlertRow
-              key={i}
-              index={i}
-              dot={alert.dot}
-              message={alert.message}
-              priority={alert.priority}
-              date={alert.date}
-            />
-          ))
-        )}
-      </motion.div>
     </motion.div>
   );
 };

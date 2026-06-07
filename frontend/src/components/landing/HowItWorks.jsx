@@ -9,9 +9,9 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section id="how-it-works" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
-      <div className="mx-auto px-8" style={{ maxWidth: '1200px' }}>
-        <motion.div className="mb-14"
+    <section id="how-it-works" className="py-16 md:py-[120px]">
+      <div className="mx-auto px-6 md:px-8" style={{ maxWidth: '1200px' }}>
+        <motion.div className="mb-10 md:mb-14"
           initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p style={{ fontSize: '12px', fontWeight: 500, letterSpacing: '1px', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>How it works</p>
           <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 500, letterSpacing: '-1.2px', lineHeight: 1.15, color: '#111', maxWidth: '440px' }}>

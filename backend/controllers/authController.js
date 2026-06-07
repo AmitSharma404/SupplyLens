@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role, organization } = req.body;
 
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Name, email and password are required" });
@@ -18,11 +21,15 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const domain = normalizedEmail.split('@')[1];
+    const defaultOrg = domain === 'gmail.com' ? 'Personal Workspace' : domain;
 
     const newUser = new User({
       name,
       email: normalizedEmail,
       password: hashedPassword,
+      role: role || 'staff',
+      organization: organization || defaultOrg
     });
 
     await newUser.save();
@@ -49,13 +56,17 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    if (!user.password) {
+      return res.status(400).json({ message: "Please log in using Google." });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
@@ -108,5 +119,67 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) {
+    return res.status(400).json({ message: "No credential provided" });
+  }
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId } = payload;
+    const normalizedEmail = email.toLowerCase().trim();
+    const domain = normalizedEmail.split('@')[1];
+    const org = domain === 'gmail.com' ? 'Personal Workspace' : domain;
+
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (user) {
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (!user.organization) user.organization = org;
+        await user.save();
+      }
+    } else {
+      user = new User({
+        name,
+        email: normalizedEmail,
+        googleId,
+        organization: org
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true, 
+      sameSite: "none", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Google login successful",
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      token: token
+    });
+
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(500).json({ success: false, message: "Google authentication failed" });
   }
 };

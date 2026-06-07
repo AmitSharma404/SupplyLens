@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-export const protectedRoute = async (req, res, next) => {
+export const protect = async (req, res, next) => {
     try {
         let token;
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -24,9 +24,11 @@ export const protectedRoute = async (req, res, next) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        // Auto-upgrade legacy 'user' role to 'admin'
+        // Auto-upgrade legacy 'user' or 'warehouse_staff' role to 'admin' or 'staff'
         if (req.user.role === 'user') {
             req.user.role = 'admin';
+        } else if (req.user.role === 'warehouse_staff') {
+            req.user.role = 'staff';
         }
 
         next();
@@ -35,15 +37,9 @@ export const protectedRoute = async (req, res, next) => {
     }
 };
 
-export const adminRoute = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
-        next();
-    } else {
-        return res.status(403).json({ success: false, message: 'Not authorized as an admin' });
-    }
-};
-
-export const verifyRole = (allowedRoles) => {
+export const authorize = (...roles) => {
+    // Flatten roles in case an array was passed (e.g. authorize(['admin', 'manager']))
+    const allowedRoles = roles.flat();
     return (req, res, next) => {
         if (!req.user || !allowedRoles.includes(req.user.role)) {
             return res.status(403).json({ success: false, message: 'Access denied' });

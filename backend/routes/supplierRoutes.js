@@ -7,20 +7,20 @@ import {
     deleteSupplier,
     getSupplierScoreBreakdown
 } from "../controllers/supplierController.js";
-import { protectedRoute, verifyRole } from "../middleware/authMiddleware.js";
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const supplierRouter = express.Router();
 
 supplierRouter.route("/")
-    .post(protectedRoute, verifyRole(["admin", "manager"]), createSupplier)
-    .get(protectedRoute, getSuppliers);
+    .post(protect, authorize(["admin", "manager"]), createSupplier)
+    .get(protect, getSuppliers);
 
 supplierRouter.route("/:id")
-    .get(protectedRoute, getSupplierById)
-    .put(protectedRoute, verifyRole(["admin", "manager"]), updateSupplier)
-    .delete(protectedRoute, verifyRole(["admin"]), deleteSupplier);
+    .get(protect, getSupplierById)
+    .put(protect, authorize(["admin", "manager"]), updateSupplier)
+    .delete(protect, authorize(["admin"]), deleteSupplier);
 
 supplierRouter.route("/:id/score-breakdown")
-    .get(protectedRoute, getSupplierScoreBreakdown);
+    .get(protect, getSupplierScoreBreakdown);
 
 export default supplierRouter;

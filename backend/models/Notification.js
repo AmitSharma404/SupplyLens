@@ -22,6 +22,10 @@ const notificationSchema = new mongoose.Schema({
     read: {
         type: Boolean,
         default: false
+    },
+    organization: {
+        type: String,
+        default: 'Legacy Workspace'
     }
 }, { timestamps: true });
 

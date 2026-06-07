@@ -10,36 +10,38 @@ const InventoryPreview = () => {
   ];
 
   return (
-    <div className="mt-5">
-      <div className="grid grid-cols-4 gap-2 mb-2 px-1">
-        {['Product', 'Category', 'Stock', 'Status'].map(h => (
-          <span key={h} style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#999' }}>{h}</span>
+    <div className="mt-5 overflow-x-auto hide-scrollbar">
+      <div className="min-w-[380px]">
+        <div className="grid grid-cols-4 gap-2 mb-2 px-1">
+          {['Product', 'Category', 'Stock', 'Status'].map(h => (
+            <span key={h} style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#999' }}>{h}</span>
+          ))}
+        </div>
+        {rows.map((r, i) => (
+          <motion.div key={r.product} className="grid grid-cols-4 gap-2 items-center py-2.5 px-1"
+            style={{ borderTop: '1px solid #f5f5f5' }}
+            initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
+            transition={{ delay: i * 0.08, duration: 0.3 }}>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#111' }}>{r.product}</span>
+            <span style={{ fontSize: '12px', color: '#888' }}>{r.category}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-full h-[5px] rounded-full overflow-hidden" style={{ background: '#f0f0f0', maxWidth: '100px' }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: r.color }}
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${r.stock}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8, delay: 0.2 + i * 0.08, ease: 'easeOut' }}
+                />
+              </div>
+            </div>
+            <span className="inline-flex px-2 py-0.5 rounded" style={{ fontSize: '10px', fontWeight: 500, color: r.statusColor, background: r.statusBg, width: 'fit-content' }}>
+              {r.status}
+            </span>
+          </motion.div>
         ))}
       </div>
-      {rows.map((r, i) => (
-        <motion.div key={r.product} className="grid grid-cols-4 gap-2 items-center py-2.5 px-1"
-          style={{ borderTop: '1px solid #f5f5f5' }}
-          initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-          transition={{ delay: i * 0.08, duration: 0.3 }}>
-          <span style={{ fontSize: '13px', fontWeight: 500, color: '#111' }}>{r.product}</span>
-          <span style={{ fontSize: '12px', color: '#888' }}>{r.category}</span>
-          <div className="flex items-center gap-2">
-            <div className="w-full h-[5px] rounded-full overflow-hidden" style={{ background: '#f0f0f0', maxWidth: '100px' }}>
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: r.color }}
-                initial={{ width: 0 }}
-                whileInView={{ width: `${r.stock}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 + i * 0.08, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
-          <span className="inline-flex px-2 py-0.5 rounded" style={{ fontSize: '10px', fontWeight: 500, color: r.statusColor, background: r.statusBg, width: 'fit-content' }}>
-            {r.status}
-          </span>
-        </motion.div>
-      ))}
     </div>
   );
 };

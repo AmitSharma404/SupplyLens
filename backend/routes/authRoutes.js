@@ -1,17 +1,17 @@
 
 import express from 'express';
-import { register,login,logout, getCurrentUser } from '../controllers/authController.js';
-import { protectedRoute } from '../middleware/authMiddleware.js';
+import { register, login, logout, getCurrentUser, googleAuth } from '../controllers/authController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const authRouter = express.Router();
 
-authRouter.post('/register',register);
+appRouter.post('/register',register);
 
-authRouter.post('/login',login);
+appRouter.post('/login',login);
 
-authRouter.post('/logout',logout);
+appRouter.post('/logout',logout);
 
-authRouter.get('/me', protectedRoute, getCurrentUser);
+appRouter.get('/me', protectedRoute, getCurrentUser);
 
 export default authRouter;
 

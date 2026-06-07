@@ -21,9 +21,9 @@ const Navbar = () => {
     >
       <div
         className="flex items-center justify-between mx-auto px-6 md:px-12"
-        style={{ maxWidth: '1200px', height: '56px' }}
+        style={{ maxWidth: '1200px', height: '64px' }}
       >
-        <Link to="/" style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', letterSpacing: '-0.3px' }}>
+        <Link to="/" style={{ fontSize: '17px', fontWeight: 600, color: '#0f172a', letterSpacing: '-0.3px' }}>
           SupplyLens
         </Link>
 
@@ -32,7 +32,7 @@ const Navbar = () => {
             <a
               key={link}
               href={`#${link.toLowerCase().replace(/\s/g, '-')}`}
-              style={{ fontSize: '13px', color: '#64748b', fontWeight: 450 }}
+              style={{ fontSize: '15px', color: '#64748b', fontWeight: 450 }}
               className="hover:text-[#0f172a] transition-colors"
             >
               {link}
@@ -40,19 +40,34 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <Link to="/login" style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+        <div className="flex items-center gap-3 md:gap-5">
+          <Link to="/login" style={{ fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>
             Log in
           </Link>
           <Link to="/signup">
             <button
-              className="px-4 py-2 rounded-[10px] cursor-pointer border-0"
+              className="px-3 md:px-5 py-2 md:py-2.5 rounded-[10px] md:rounded-[12px] cursor-pointer border-0 whitespace-nowrap"
               style={{ background: '#0f172a', color: '#fff', fontSize: '13px', fontWeight: 500 }}
             >
-              Get started free
+              Get started
             </button>
           </Link>
         </div>
+      </div>
+      
+      {/* Mobile minimal navigation */}
+      <div className="md:hidden flex items-center justify-center gap-6 px-4 py-2 overflow-x-auto hide-scrollbar"
+        style={{ borderTop: scrolled ? '1px solid #e2e8f0' : '1px solid transparent' }}>
+        {['Features', 'How it works', 'Compare', 'Docs'].map(link => (
+          <a
+            key={link}
+            href={`#${link.toLowerCase().replace(/\s/g, '-')}`}
+            style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, whiteSpace: 'nowrap' }}
+            className="hover:text-[#0f172a] transition-colors"
+          >
+            {link}
+          </a>
+        ))}
       </div>
     </nav>
   );

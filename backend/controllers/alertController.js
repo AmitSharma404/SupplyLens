@@ -10,14 +10,16 @@ export const getAlerts = async (req, res) => {
         const today = new Date();
         const overdueOrders = await PurchaseOrder.find({
             status: "shipped",
-            expectedDeliveryDate: { $lt: today, $ne: null }
+            expectedDeliveryDate: { $lt: today, $ne: null },
+            organization: req.user.organization
         }).populate("supplier", "name");
 
         for (const order of overdueOrders) {
             // Check if alert already exists for this order
             const existingAlert = await Notification.findOne({
                 type: "SUPPLIER_DELAY",
-                message: { $regex: order._id.toString() }
+                message: { $regex: order._id.toString() },
+                organization: req.user.organization
             });
 
             if (!existingAlert) {
@@ -29,7 +31,8 @@ export const getAlerts = async (req, res) => {
                     type: "SUPPLIER_DELAY",
                     message: `Order #${order._id} from ${order.supplier?.name || 'Unknown Supplier'} was expected on ${formattedDate} but has not been marked delivered.`,
                     priority: "HIGH",
-                    productId: productId
+                    productId: productId,
+                    organization: req.user.organization
                 });
             }
         }
@@ -38,7 +41,7 @@ export const getAlerts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
 
-        const query = {};
+        const query = { organization: req.user.organization };
         if (req.query.read !== undefined) {
             query.read = req.query.read === "true";
         }
@@ -70,7 +73,7 @@ export const getAlerts = async (req, res) => {
 // @access  Private
 export const markAlertRead = async (req, res) => {
     try {
-        const alert = await Notification.findById(req.params.id);
+        const alert = await Notification.findOne({ _id: req.params.id, organization: req.user.organization });
         if (!alert) return res.status(404).json({ success: false, message: "Alert not found." });
 
         alert.read = true;
